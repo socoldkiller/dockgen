@@ -1,0 +1,51 @@
+# Go 编译文件
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+dockgen
+
+# Go modules & vendor
+/vendor/
+/bin/
+/build/
+
+# IDE / 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# 日志 / 缓存
+*.log
+*.tmp
+*.cache
+*.pid
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Docker 构建
+**/docker-compose.override.yml
+**/Dockerfile.local
+.docker/
+docker-debug/
+*.img
+*.qcow2
+
+# 单元测试缓存
+*.coverprofile
+*.testresult
+*.prof
+
+# 临时 shell 录制文件
+recordings/
+session_logs/
+
+# CLI 用户配置（如果你之后支持配置）
+.config/
