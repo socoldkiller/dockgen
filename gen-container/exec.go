@@ -5,7 +5,8 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	"golang.org/x/term"
+	"github.com/moby/term"
+	"os"
 	"time"
 )
 
@@ -26,7 +27,7 @@ func WaitExecExit(ctx context.Context, cli *client.Client, execID string, execCo
 func ExecContainer(c *client.Client, ID string, cmd string) (types.HijackedResponse, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	width, height, err := term.GetSize(0)
+	ws, err := term.GetWinsize(os.Stdin.Fd())
 	if err != nil {
 		return types.HijackedResponse{}, err
 	}
@@ -37,7 +38,7 @@ func ExecContainer(c *client.Client, ID string, cmd string) (types.HijackedRespo
 		AttachStderr: true,
 		Tty:          true,
 		Cmd:          []string{cmd},
-		ConsoleSize:  &[2]uint{uint(height), uint(width)},
+		ConsoleSize:  &[2]uint{uint(ws.Height), uint(ws.Width)},
 	})
 
 	if err != nil {

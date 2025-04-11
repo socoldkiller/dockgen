@@ -1,14 +1,11 @@
 package main
 
 import (
-	"bytes"
 	genContainer "dockgen/gen-container"
 	"fmt"
 	"golang.org/x/term"
-	"io"
 	"log"
 	"os"
-	"sync"
 )
 
 func main() {
@@ -18,49 +15,33 @@ func main() {
 	}
 	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
-	if len(os.Args) != 3 || os.Args[1] != "debug" {
-		fmt.Println("Usage: dockgen debug <gen-container-id>")
+	_, err = os.Create("bash_history")
+	if err != nil {
+
 		return
 	}
-	containerID := os.Args[2]
-	fmt.Println(containerID)
-	cli := genContainer.Client()
-	execContainer, err := genContainer.CreateExecContainer(cli, "./Dockerfile", genContainer.CreateExecOptions{
-		ImageName:     "hello:0.2",
-		ContainerName: "hello1",
+	defer os.Remove("bash_history")
+	attachContainer, err := genContainer.CreateAttachContainer(genContainer.Client(), genContainer.CreateBuildAndContainerOptions{
+		Tag:           "debugger:0.2",
+		ContainerName: "",
 		Cmd:           "/bin/sh",
+		Tty:           true,
+		Mounts: map[string]string{
+			"bash_history": "/root/.bash_history",
+		},
+		Env: []string{
+			"HISTFILE=/root/.bash_history",
+			"HISTSIZE=10000",
+			"HISTFILESIZE=20000",
+		},
 	})
 
 	if err != nil {
-		return
+		log.Println(err)
 	}
-	go genContainer.CopyIO(os.Stdout, execContainer.Reader)
-	var w WaitGroup
-	w.Do(func() {
-		buf := make([]byte, 1)
-		var n int
-		for {
-
-			if n, err = os.Stdin.Read(buf); err != nil {
-				break
-			}
-			if _, err = io.Copy(execContainer.Conn, bytes.NewReader(buf[:n])); err != nil {
-				break
-			}
-
-		}
-	})
-	w.Wait()
-}
-
-type WaitGroup struct {
-	sync.WaitGroup
-}
-
-func (wait *WaitGroup) Do(do func()) {
-	wait.Add(1)
-	go func() {
-		defer wait.Done()
-		do()
-	}()
+	go genContainer.CopyIO(attachContainer.Conn, os.Stdin)
+	genContainer.CopyIO(os.Stdout, attachContainer.Reader)
+	term.Restore(int(os.Stdin.Fd()), oldState)
+	f, _ := os.ReadFile("bash_history")
+	defer fmt.Printf("%s", f)
 }

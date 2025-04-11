@@ -49,3 +49,5 @@ session_logs/
 
 # CLI 用户配置（如果你之后支持配置）
 .config/
+
+*.txt
