@@ -1,0 +1,21 @@
+[
+  {
+    "name": "vi",
+    "action": "drop"
+  },
+
+  {
+    "name": "vim",
+    "action": "drop"
+  },
+
+  {
+    "name": "cat",
+    "action": "drop"
+  },
+
+  {
+    "name:": "",
+    "action": "accept"
+  }
+]

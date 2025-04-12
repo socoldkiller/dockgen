@@ -22,6 +22,7 @@ type Rule interface {
 }
 
 type RuleActionError struct {
+	Cmd    string
 	Action string
 	Reason string
 }

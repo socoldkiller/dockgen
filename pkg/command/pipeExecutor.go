@@ -149,7 +149,7 @@ func NewPipeCommandExecutor(CMD string, opts ...PipeExecutorOptions) (*PipeComma
 	stdoutReader := NewDelimitedReader(stdout, delim)
 	stderrReader := NewDelimitedReader(stderr, delim)
 
-	rs, err := loadBuiltinRules("rule.yaml", rules.JSON)
+	rs, err := loadBuiltinRules("rule.json", rules.JSON)
 
 	if err != nil {
 		rs = make(map[string]rules.BuiltinRule)
@@ -173,19 +173,25 @@ func NewPipeCommandExecutor(CMD string, opts ...PipeExecutorOptions) (*PipeComma
 }
 
 func (pipe *PipeCommandExecutor) ExecuteCommand(cmd string) (Result, error) {
-	r := pipe.builtinRules[cmd]
-	switch r.RuleAction() {
+	r, found := pipe.builtinRules[cmd]
+	if !found {
+		// ok,we use "" name to instead of not found rule
+		if r, found = pipe.builtinRules[""]; !found {
+			return Result{}, rules.NewRejectError(cmd, fmt.Sprintf("%s rule not found", cmd))
+		}
 
+	}
+
+	switch r.RuleAction() {
 	case rules.ActionAccept:
-	case "": // default rule Accept? Maybe we need default rule?
 		return pipe.executeCommand(cmd)
 
 	case rules.ActionDrop:
 
-		return Result{}, rules.NewDropError("blocked by rule: command dropped")
+		return Result{}, rules.NewDropError(cmd, "blocked by rule: command dropped")
 
 	case rules.ActionReject:
-		return Result{}, rules.NewRejectError("blocked by rule: command rejected")
+		return Result{}, rules.NewRejectError(cmd, "blocked by rule: command rejected")
 
 	}
 

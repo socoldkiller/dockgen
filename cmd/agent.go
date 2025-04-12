@@ -16,7 +16,7 @@ import (
 func AgentCommandHandler() (func(w http.ResponseWriter, r *http.Request), error) {
 
 	executor, err := command.NewPipeCommandExecutor("bash",
-		command.WithRuleFile("rule.yaml", rules.JSON))
+		command.WithRuleFile("rule.json", rules.JSON))
 	if err != nil {
 		log.Fatal(err)
 	}
