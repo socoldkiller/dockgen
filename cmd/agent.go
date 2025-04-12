@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"dockgen/pkg/command"
+	"dockgen/pkg/rules"
 	"encoding/json"
 	"github.com/spf13/cobra"
 	"io"
@@ -14,9 +15,8 @@ import (
 
 func AgentCommandHandler() (func(w http.ResponseWriter, r *http.Request), error) {
 
-	delim := "__CMD_DONE__"
-	executor, err := NewPipeCommandExecutor("bash", delim)
-
+	executor, err := command.NewPipeCommandExecutor("bash",
+		command.WithRuleFile("rule.yaml", rules.JSON))
 	if err != nil {
 		log.Fatal(err)
 	}

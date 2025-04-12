@@ -11,11 +11,6 @@ type Rules struct {
 	r io.Reader
 }
 
-const (
-	JSON = "json"
-	YAML = "yaml"
-)
-
 func LoadFromFile(Path string) (Rules, error) {
 	r, err := os.Open(Path)
 	if err != nil {
@@ -27,7 +22,7 @@ func LoadFromFile(Path string) (Rules, error) {
 	}, nil
 }
 
-func (rs *Rules) Parse(Format string) ([]BuiltinRule, error) {
+func (rs *Rules) Parse(Format FormatType) ([]BuiltinRule, error) {
 	var (
 		rules []BuiltinRule
 		err   error

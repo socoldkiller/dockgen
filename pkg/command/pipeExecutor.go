@@ -1,8 +1,7 @@
-package cmd
+package command
 
 import (
 	"bytes"
-	"dockgen/pkg/command"
 	"dockgen/pkg/rules"
 	"fmt"
 	"github.com/shirou/gopsutil/process"
@@ -89,14 +88,14 @@ type PipeCommandExecutor struct {
 	builtinRules map[string]rules.BuiltinRule
 }
 
-func loadBuiltinRules(Path string) (map[string]rules.BuiltinRule, error) {
+func loadBuiltinRules(Path string, FormatType rules.FormatType) (map[string]rules.BuiltinRule, error) {
 	rs, err := rules.LoadFromFile(Path)
 
 	if err != nil {
 		return nil, err
 	}
 
-	builtinRules, err := rs.Parse(rules.JSON)
+	builtinRules, err := rs.Parse(FormatType)
 
 	if err != nil {
 		return nil, err
@@ -111,7 +110,7 @@ func loadBuiltinRules(Path string) (map[string]rules.BuiltinRule, error) {
 
 }
 
-func NewPipeCommandExecutor(CMD string, delim string) (*PipeCommandExecutor, error) {
+func NewPipeCommandExecutor(CMD string, opts ...PipeExecutorOptions) (*PipeCommandExecutor, error) {
 	var (
 		err          error
 		cmd          *exec.Cmd
@@ -146,76 +145,97 @@ func NewPipeCommandExecutor(CMD string, delim string) (*PipeCommandExecutor, err
 	if err = <-startedChan; err != nil {
 		return nil, err
 	}
-
+	delim := "__CMD_DONE__"
 	stdoutReader := NewDelimitedReader(stdout, delim)
 	stderrReader := NewDelimitedReader(stderr, delim)
 
-	rs, err := loadBuiltinRules("rule.yaml")
+	rs, err := loadBuiltinRules("rule.yaml", rules.JSON)
 
 	if err != nil {
-		return nil, err
+		rs = make(map[string]rules.BuiltinRule)
 	}
 
-	return &PipeCommandExecutor{
+	p := &PipeCommandExecutor{
 		stdin:        stdin,
 		stdout:       stdoutReader,
 		stderr:       stderrReader,
 		delim:        delim,
 		cmd:          cmd,
 		builtinRules: rs,
-	}, nil
+	}
+
+	for _, opt := range opts {
+		if err = opt(p); err != nil {
+			return nil, err
+		}
+	}
+	return p, nil
 }
 
-func (pipe *PipeCommandExecutor) ExecuteCommand(cmd string) (command.Result, error) {
+func (pipe *PipeCommandExecutor) ExecuteCommand(cmd string) (Result, error) {
 	r := pipe.builtinRules[cmd]
 	switch r.RuleAction() {
+
 	case rules.ActionAccept:
-	case "":
+	case "": // default rule Accept? Maybe we need default rule?
 		return pipe.executeCommand(cmd)
 
 	case rules.ActionDrop:
 
-		return command.Result{}, rules.NewDropError("blocked by rule: command dropped")
+		return Result{}, rules.NewDropError("blocked by rule: command dropped")
 
 	case rules.ActionReject:
-		return command.Result{}, rules.NewRejectError("blocked by rule: command rejected")
+		return Result{}, rules.NewRejectError("blocked by rule: command rejected")
 
 	}
 
-	return command.Result{}, fmt.Errorf("unknown rule action")
+	return Result{}, fmt.Errorf("unknown rule action")
 
 }
 
-func (pipe *PipeCommandExecutor) executeCommand(cmd string) (command.Result, error) {
+func (pipe *PipeCommandExecutor) executeCommand(cmd string) (Result, error) {
 	var (
 		outBuf = new(bytes.Buffer)
 		errBuf = new(bytes.Buffer)
-		cmdID  = pipe.delim
+		delim  = pipe.delim
 		err    error
 	)
 
-	fullCmd := fmt.Sprintf("%s; echo %s; echo %s 1>&2\n", cmd, cmdID, cmdID)
+	fullCmd := fmt.Sprintf("%s; echo %s; echo %s 1>&2\n", cmd, delim, delim)
 
 	if err != nil {
-		return command.Result{}, err
+		return Result{}, err
 	}
 
 	if _, err = io.Copy(pipe.stdin, strings.NewReader(fullCmd)); err != nil {
-		return command.Result{}, err
+		return Result{}, err
 	}
 
 	if _, err = io.Copy(outBuf, pipe.stdout); err != nil {
-		return command.Result{}, err
+		return Result{}, err
 	}
 
 	if _, err = io.Copy(errBuf, pipe.stderr); err != nil {
-		return command.Result{}, err
+		return Result{}, err
 	}
 
-	res := command.Result{
+	res := Result{
 		Cmd:    cmd,
 		Stdout: outBuf.String(),
 		Stderr: errBuf.String(),
 	}
 	return res, nil
+}
+
+type PipeExecutorOptions = func(*PipeCommandExecutor) error
+
+func WithRuleFile(path string, FormatType rules.FormatType) PipeExecutorOptions {
+	return func(executor *PipeCommandExecutor) error {
+		rs, err := loadBuiltinRules(path, FormatType)
+		if err != nil {
+			return err
+		}
+		executor.builtinRules = rs
+		return nil
+	}
 }
