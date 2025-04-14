@@ -66,8 +66,8 @@ func (e *StreamedContainerExecutor) ExecuteCommand(cmd string) (Result, error) {
 
 	res := Result{
 		Cmd:    cmd,
-		Stdout: outBuf.String(),
-		Stderr: errBuf.String(),
+		Stdout: strings.TrimSpace(outBuf.String()),
+		Stderr: strings.TrimSpace(errBuf.String()),
 	}
 	return res, nil
 }

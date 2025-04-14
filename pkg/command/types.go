@@ -1,7 +1,7 @@
 package command
 
 type Result struct {
-	Cmd    string
-	Stdout string
-	Stderr string
+	Cmd    string `json:"cmd"`
+	Stdout string `json:"stdout"`
+	Stderr string `json:"stderr"`
 }
