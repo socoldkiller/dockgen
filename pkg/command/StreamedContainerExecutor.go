@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"dockgen/pkg/concurrency"
+	"dockgen/pkg/copy"
 	"fmt"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/sirupsen/logrus"
 	"io"
 	"net"
 	"strings"
@@ -55,13 +57,15 @@ func (e *StreamedContainerExecutor) ExecuteCommand(cmd string) (Result, error) {
 
 	fullCmd := fmt.Sprintf("%s; echo %s; echo %s 1>&2\n", cmd, delim, delim)
 
+	logrus.Debugf("full cmd '%s' ", fullCmd[:len(fullCmd)-1])
+
 	if _, err = io.Copy(e.stdin, strings.NewReader(fullCmd)); err != nil {
 		return Result{}, err
 	}
 
 	var wg concurrency.AsyncGroup
-	wg.Do(func() { _, _ = io.Copy(outBuf, e.stdout) })
-	wg.Do(func() { _, _ = io.Copy(errBuf, e.stderr) })
+	wg.Do(func() { copy.Copy(outBuf, e.stdout) })
+	wg.Do(func() { copy.Copy(errBuf, e.stderr) })
 	wg.Wait()
 
 	res := Result{

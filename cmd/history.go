@@ -12,6 +12,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 )
 
 // historyCmd represents the history command
@@ -44,6 +45,8 @@ to quickly create a Cobra application.`,
 		}
 
 		json.NewEncoder(os.Stdout).Encode(list)
+
+		time.Sleep(2 * time.Second)
 
 	},
 }
