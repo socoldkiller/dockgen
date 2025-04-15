@@ -1,32 +1,47 @@
 package matcher
 
 import (
-	"dockgen/pkg/rules"
+	"dockgen/pkg/rule"
+	"fmt"
+	"regexp"
 	"strings"
 )
 
 type CmdToken struct {
-	cmd  string
-	args []string
+	cmd     string
+	cmdArgs string
 }
 
-func NewCmdToken(cmd string) *CmdToken {
-	list := strings.Split(cmd, " ")
+func newCmdToken(cmd string) *CmdToken {
+	list := strings.SplitN(cmd, " ", 2)
+
+	if len(list) < 2 {
+		list = append(list, "")
+	}
 	return &CmdToken{
-		cmd:  list[0],
-		args: list[1:],
+		cmd:     strings.TrimSpace(list[0]),
+		cmdArgs: strings.TrimSpace(list[1]),
 	}
 }
 
-type CmdRuleToken struct {
+type cmdRuleToken struct {
 	*CmdToken
-	rule rules.Rule
+	rule       rule.Rule
+	pattern    *regexp.Regexp
+	patternStr string
 }
 
-func NewCmdRuleToken(r rules.Rule) *CmdRuleToken {
+func newCmdRuleToken(r rule.Rule) *cmdRuleToken {
 	cmd := r.RuleCmd()
-	return &CmdRuleToken{
-		CmdToken: NewCmdToken(cmd),
-		rule:     r,
+	cmdToken := newCmdToken(cmd)
+	cmd = fmt.Sprintf("%s %s", cmdToken.cmd, cmdToken.cmdArgs)
+	patternStr := regexp.QuoteMeta(cmd)
+	patternStr = "^" + strings.ReplaceAll(patternStr, `\*`, `.*`) + "$"
+	re := regexp.MustCompile(patternStr)
+	return &cmdRuleToken{
+		CmdToken:   cmdToken,
+		rule:       r,
+		pattern:    re,
+		patternStr: patternStr,
 	}
 }

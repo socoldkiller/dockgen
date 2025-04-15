@@ -1,59 +1,67 @@
 package matcher
 
 import (
-	rs "dockgen/pkg/rules"
+	"dockgen/pkg/rule"
 	"fmt"
 )
 
-type RulesMatcher interface {
-	Match(cmd string) (rs.Rule, error)
-}
+type MatchStatus int
 
-type RulesCmdMatcher struct {
-	ruleSet map[string]rs.Rule
-}
+const (
+	MatchOK MatchStatus = iota
+	MatchNotFoundRule
+	MatchNotMatched
+	MatchInvalidPattern
+)
 
-func (matcher *RulesCmdMatcher) Match(cmd string) (rs.Rule, error) {
-	rule, ok := matcher.ruleSet[cmd]
-	if !ok {
-		return rule, fmt.Errorf("not found")
+func (s MatchStatus) String() string {
+	switch s {
+	case MatchOK:
+		return "MatchOK"
+	case MatchNotFoundRule:
+		return "MatchNotFoundRule"
+	case MatchNotMatched:
+		return "MatchNotMatched"
+	case MatchInvalidPattern:
+		return "MatchInvalidPattern"
+	default:
+		return "UnknownMatchStatus"
 	}
-	return rule, nil
 }
 
-func NewRulesMatcher(rules []rs.Rule) *RulesCmdMatcher {
-	ruleSet := make(map[string]rs.Rule)
-	for _, rule := range rules {
-		cmd := rule.RuleCmd()
-		ruleSet[cmd] = rule
-	}
-
-	return &RulesCmdMatcher{ruleSet: ruleSet}
+type RuleMatcher interface {
+	Match(cmd string) (rule.Rule, MatchStatus)
 }
 
-type RuleCmdTokenMatcher struct {
-	ruleSet map[string]*CmdRuleToken
+type RuleCmdMatcher struct {
+	ruleSet map[string]*cmdRuleToken
 }
 
-func NewRuleCmdTokenMatcher(rules []rs.Rule) *RuleCmdTokenMatcher {
-	ruleSet := make(map[string]*CmdRuleToken)
-	for _, rule := range rules {
-		cmdToken := NewCmdRuleToken(rule)
+func NewRuleCmdTokenMatcher(rules []rule.Rule) *RuleCmdMatcher {
+	ruleSet := make(map[string]*cmdRuleToken)
+	for _, r := range rules {
+		cmdToken := newCmdRuleToken(r)
 		ruleSet[cmdToken.cmd] = cmdToken
 	}
 
-	return &RuleCmdTokenMatcher{
+	return &RuleCmdMatcher{
 		ruleSet: ruleSet,
 	}
 }
 
-func (matcher *RuleCmdTokenMatcher) Match(cmd string) (rs.Rule, error) {
-	matchCmdToken := NewCmdToken(cmd)
+func (matcher *RuleCmdMatcher) Match(cmd string) (rule.Rule, MatchStatus) {
+	matchCmdToken := newCmdToken(cmd)
 	if r, ok := matcher.ruleSet[matchCmdToken.cmd]; ok {
-		//todo
-		return r.rule, nil
-
+		return TokenMatch(matchCmdToken, r)
 	}
-	return nil, fmt.Errorf("not found rule")
+	return nil, MatchNotFoundRule
 
+}
+
+func TokenMatch(cmdToken *CmdToken, matchToken *cmdRuleToken) (rule.Rule, MatchStatus) {
+	cmd := fmt.Sprintf("%s %s", cmdToken.cmd, cmdToken.cmdArgs)
+	if matchToken.pattern.MatchString(cmd) {
+		return matchToken.rule, MatchOK
+	}
+	return nil, MatchNotMatched
 }

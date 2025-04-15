@@ -1,4 +1,4 @@
-package rules
+package rule
 
 type BuiltinRule struct {
 	Cmd       string     `json:"cmd"`

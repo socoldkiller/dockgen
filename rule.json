@@ -1,21 +1,18 @@
 [
   {
-    "name": "vi",
+    "cmd": "vi *",
     "action": "drop"
   },
-
   {
-    "name": "vim",
+    "cmd": "vim *",
     "action": "drop"
   },
-
   {
-    "name": "cat",
+    "cmd": "wget *",
     "action": "drop"
   },
-
   {
-    "name:": "",
+    "cmd": "ls *",
     "action": "accept"
   }
 ]

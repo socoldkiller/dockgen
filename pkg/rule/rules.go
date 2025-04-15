@@ -1,4 +1,4 @@
-package rules
+package rule
 
 import (
 	"encoding/json"
@@ -50,15 +50,15 @@ func ParseFromFile(Path string, formatType FormatType) (*Rules, error) {
 //
 //func (rs *Rules) Parse(Format FormatType) ([]BuiltinRule, error) {
 //	var (
-//		rules []BuiltinRule
+//		rule []BuiltinRule
 //		err   error
 //	)
 //	switch Format {
 //
 //	case JSON:
-//		err = json.NewDecoder(rs.r).Decode(&rules)
+//		err = json.NewDecoder(rs.r).Decode(&rule)
 //	case YAML:
-//		err = yaml.NewDecoder(rs.r).Decode(&rules)
+//		err = yaml.NewDecoder(rs.r).Decode(&rule)
 //	default:
 //		panic("unknown parser")
 //	}
@@ -67,6 +67,6 @@ func ParseFromFile(Path string, formatType FormatType) (*Rules, error) {
 //		return nil, err
 //	}
 //
-//	return rules, nil
+//	return rule, nil
 //
 //}

@@ -2,7 +2,7 @@ package command
 
 import (
 	"bytes"
-	"dockgen/pkg/rules"
+	"dockgen/pkg/rule"
 	"fmt"
 	"github.com/shirou/gopsutil/process"
 	"io"
@@ -85,7 +85,7 @@ type PipeCommandExecutor struct {
 	stdout       io.Reader
 	stderr       io.Reader
 	cmd          *exec.Cmd
-	builtinRules map[string]rules.BuiltinRule
+	builtinRules map[string]rule.BuiltinRule
 }
 
 func NewPipeCommandExecutor(CMD string, opts ...PipeExecutorOptions) (*PipeCommandExecutor, error) {
@@ -149,21 +149,21 @@ func (pipe *PipeCommandExecutor) ExecuteCommand(cmd string) (Result, error) {
 	if !found {
 		// ok,we use "" name to instead of not found rule
 		if r, found = pipe.builtinRules[""]; !found {
-			return Result{}, rules.NewRejectError(cmd, fmt.Sprintf("%s rule not found", cmd))
+			return Result{}, rule.NewRejectError(cmd, fmt.Sprintf("%s rule not found", cmd))
 		}
 
 	}
 
 	switch r.RuleAction() {
-	case rules.ActionAccept:
+	case rule.ActionAccept:
 		return pipe.executeCommand(cmd)
 
-	case rules.ActionDrop:
+	case rule.ActionDrop:
 
-		return Result{}, rules.NewDropError(cmd, "blocked by rule: command dropped")
+		return Result{}, rule.NewDropError(cmd, "blocked by rule: command dropped")
 
-	case rules.ActionReject:
-		return Result{}, rules.NewRejectError(cmd, "blocked by rule: command rejected")
+	case rule.ActionReject:
+		return Result{}, rule.NewRejectError(cmd, "blocked by rule: command rejected")
 
 	}
 
@@ -207,7 +207,7 @@ func (pipe *PipeCommandExecutor) executeCommand(cmd string) (Result, error) {
 
 type PipeExecutorOptions = func(*PipeCommandExecutor) error
 
-func WithRuleFile(path string, FormatType rules.FormatType) PipeExecutorOptions {
+func WithRuleFile(path string, FormatType rule.FormatType) PipeExecutorOptions {
 	return func(executor *PipeCommandExecutor) error {
 		return nil
 	}

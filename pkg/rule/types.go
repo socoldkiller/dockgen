@@ -1,4 +1,4 @@
-package rules
+package rule
 
 type MatchType string
 type RuleAction string

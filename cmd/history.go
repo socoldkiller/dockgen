@@ -8,9 +8,9 @@ import (
 	"dockgen/pkg/command"
 	"dockgen/pkg/policy/matcher"
 	"dockgen/pkg/rand"
-	"dockgen/pkg/rules"
+	"dockgen/pkg/rule"
+	convert "dockgen/pkg/util"
 	"encoding/json"
-	"fmt"
 	"github.com/spf13/cobra"
 	"io"
 	"os"
@@ -93,35 +93,31 @@ func HistoryCommandStd(cmds []string) ([]command.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	var r = rules.BuiltinRule{
-		Cmd:    "ls",
-		Action: "drop",
-	}
-	ruleExecutor := command.NewRuleExecutor(matcher.NewRulesMatcher([]rules.Rule{r}), executor)
-
-	res, err := ruleExecutor.ExecuteCommand("ls")
-	if err != nil {
+	var f *os.File
+	if f, err = os.Open("rule.json"); err != nil {
 		return nil, err
 	}
+	var rs []rule.BuiltinRule
+	if err = json.NewDecoder(f).Decode(&rs); err != nil {
+		return nil, err
+	}
+	irs, _ := convert.CastSlice[rule.BuiltinRule, rule.Rule](rs)
 
-	fmt.Println(res)
+	m := matcher.NewRuleCmdTokenMatcher(irs)
 
-	return nil, nil
+	ruleExecutor := command.NewRuleExecutor(m, executor)
 
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//var cmdOut []command.Result
-	//for _, c := range cmds {
-	//	if out, err := executor.ExecuteCommand(c); err != nil {
-	//		//todo
-	//	} else {
-	//		cmdOut = append(cmdOut, out)
-	//	}
-	//}
-	//return cmdOut, err
+	var results []command.Result
+	for _, cmd := range cmds {
+		res, err := ruleExecutor.ExecuteCommand(cmd)
+		if err != nil {
+			continue
+		}
+		results = append(results, res)
+	}
+
+	return results, nil
+
 }
 
 func init() {
