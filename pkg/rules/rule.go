@@ -1,12 +1,16 @@
 package rules
 
 type BuiltinRule struct {
-	Name      string
-	MatchType MatchType
-	Pattern   string
-	Action    RuleAction
-	Reason    string
-	Tags      []string
+	Cmd       string     `json:"cmd"`
+	MatchType MatchType  `json:"matchType"`
+	Pattern   string     `json:"pattern"`
+	Action    RuleAction `json:"action"`
+	Reason    string     `json:"reason"`
+	Tags      []string   `json:"tags"`
+}
+
+func (r BuiltinRule) RuleCmd() string {
+	return r.Cmd
 }
 
 func (r BuiltinRule) RuleAction() RuleAction {

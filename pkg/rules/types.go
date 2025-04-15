@@ -5,9 +5,10 @@ type RuleAction string
 type FormatType string
 
 const (
-	ActionAccept RuleAction = "accept"
-	ActionReject RuleAction = "reject"
-	ActionDrop   RuleAction = "drop"
+	ActionAccept  RuleAction = "accept"
+	ActionReject  RuleAction = "reject"
+	ActionDrop    RuleAction = "drop"
+	ActionUnknown RuleAction = "unknown"
 )
 
 const (
@@ -19,6 +20,7 @@ type Rule interface {
 	RuleAction() RuleAction
 	RuleReason() string
 	RuleTags() []string
+	RuleCmd() string
 }
 
 type RuleActionError struct {

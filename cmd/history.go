@@ -6,8 +6,11 @@ package cmd
 import (
 	genContainer "dockgen/gen-container"
 	"dockgen/pkg/command"
+	"dockgen/pkg/policy/matcher"
 	"dockgen/pkg/rand"
+	"dockgen/pkg/rules"
 	"encoding/json"
+	"fmt"
 	"github.com/spf13/cobra"
 	"io"
 	"os"
@@ -86,19 +89,39 @@ func HistoryCommandStd(cmds []string) ([]command.Result, error) {
 	}
 
 	executor, err := command.NewStreamedContainerExecutor(c, ContainerName, attachContainer.Conn)
+
 	if err != nil {
 		return nil, err
 	}
 
-	var cmdOut []command.Result
-	for _, c := range cmds {
-		if out, err := executor.ExecuteCommand(c); err != nil {
-			//todo
-		} else {
-			cmdOut = append(cmdOut, out)
-		}
+	var r = rules.BuiltinRule{
+		Cmd:    "ls",
+		Action: "drop",
 	}
-	return cmdOut, err
+	ruleExecutor := command.NewRuleExecutor(matcher.NewRulesMatcher([]rules.Rule{r}), executor)
+
+	res, err := ruleExecutor.ExecuteCommand("ls")
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(res)
+
+	return nil, nil
+
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//var cmdOut []command.Result
+	//for _, c := range cmds {
+	//	if out, err := executor.ExecuteCommand(c); err != nil {
+	//		//todo
+	//	} else {
+	//		cmdOut = append(cmdOut, out)
+	//	}
+	//}
+	//return cmdOut, err
 }
 
 func init() {

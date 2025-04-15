@@ -88,28 +88,6 @@ type PipeCommandExecutor struct {
 	builtinRules map[string]rules.BuiltinRule
 }
 
-func loadBuiltinRules(Path string, FormatType rules.FormatType) (map[string]rules.BuiltinRule, error) {
-	rs, err := rules.LoadFromFile(Path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	builtinRules, err := rs.Parse(FormatType)
-
-	if err != nil {
-		return nil, err
-	}
-
-	table := make(map[string]rules.BuiltinRule)
-
-	for _, r := range builtinRules {
-		table[r.Name] = r
-	}
-	return table, nil
-
-}
-
 func NewPipeCommandExecutor(CMD string, opts ...PipeExecutorOptions) (*PipeCommandExecutor, error) {
 	var (
 		err          error
@@ -149,19 +127,13 @@ func NewPipeCommandExecutor(CMD string, opts ...PipeExecutorOptions) (*PipeComma
 	stdoutReader := NewDelimitedReader(stdout, delim)
 	stderrReader := NewDelimitedReader(stderr, delim)
 
-	rs, err := loadBuiltinRules("rule.json", rules.JSON)
-
-	if err != nil {
-		rs = make(map[string]rules.BuiltinRule)
-	}
-
 	p := &PipeCommandExecutor{
 		stdin:        stdin,
 		stdout:       stdoutReader,
 		stderr:       stderrReader,
 		delim:        delim,
 		cmd:          cmd,
-		builtinRules: rs,
+		builtinRules: nil,
 	}
 
 	for _, opt := range opts {
@@ -237,11 +209,6 @@ type PipeExecutorOptions = func(*PipeCommandExecutor) error
 
 func WithRuleFile(path string, FormatType rules.FormatType) PipeExecutorOptions {
 	return func(executor *PipeCommandExecutor) error {
-		rs, err := loadBuiltinRules(path, FormatType)
-		if err != nil {
-			return err
-		}
-		executor.builtinRules = rs
 		return nil
 	}
 }

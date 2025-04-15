@@ -2,45 +2,71 @@ package rules
 
 import (
 	"encoding/json"
-	"gopkg.in/yaml.v3"
-	"io"
 	"os"
 )
 
 type Rules struct {
-	r io.Reader
+	rules []Rule
 }
 
-func LoadFromFile(Path string) (Rules, error) {
-	r, err := os.Open(Path)
+func ParseFromFile(Path string, formatType FormatType) (*Rules, error) {
+	f, err := os.Open(Path)
 	if err != nil {
-		return Rules{}, err
-
+		return nil, err
 	}
-	return Rules{
-		r: r,
-	}, nil
-}
-
-func (rs *Rules) Parse(Format FormatType) ([]BuiltinRule, error) {
-	var (
-		rules []BuiltinRule
-		err   error
-	)
-	switch Format {
-
+	var rules []Rule
+	switch formatType {
 	case JSON:
-		err = json.NewDecoder(rs.r).Decode(&rules)
+		err = json.NewDecoder(f).Decode(&rules)
 	case YAML:
-		err = yaml.NewDecoder(rs.r).Decode(&rules)
-	default:
-		panic("unknown parser")
+		err = json.NewDecoder(f).Decode(&rules)
+
 	}
 
 	if err != nil {
 		return nil, err
 	}
-
-	return rules, nil
+	return &Rules{
+		rules: rules,
+	}, nil
 
 }
+
+//
+//type Rules struct {
+//	r io.Reader
+//}
+//
+//func LoadFromFile(P ath string) (Rules, error) {
+//	r, err := os.Open(Path)
+//	if err != nil {
+//		return Rules{}, err
+//
+//	}
+//	return Rules{
+//		r: r,
+//	}, nil
+//}
+//
+//func (rs *Rules) Parse(Format FormatType) ([]BuiltinRule, error) {
+//	var (
+//		rules []BuiltinRule
+//		err   error
+//	)
+//	switch Format {
+//
+//	case JSON:
+//		err = json.NewDecoder(rs.r).Decode(&rules)
+//	case YAML:
+//		err = yaml.NewDecoder(rs.r).Decode(&rules)
+//	default:
+//		panic("unknown parser")
+//	}
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return rules, nil
+//
+//}
