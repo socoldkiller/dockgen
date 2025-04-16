@@ -5,17 +5,15 @@ package cli
 
 import (
 	genContainer "dockgen/gen-container"
-
-	"dockgen/pkg/command"
-
-	"dockgen/pkg/rand"
-
-	runner "dockgen/pkg/util"
+	"dockgen/pkg/copy"
+	"dockgen/pkg/playback"
+	"dockgen/pkg/recorder"
+	"dockgen/pkg/runner"
 	"encoding/json"
+	"fmt"
+	"github.com/moby/term"
 	"github.com/spf13/cobra"
-	"io"
 	"os"
-	"strings"
 )
 
 // historyCmd represents the history command
@@ -29,50 +27,15 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var err error
-		f, err := os.Open("bash_history")
-		if err != nil {
-			return
-		}
-
-		historyCmd, err := HistoryCmdByFile(f)
-
-		if err != nil {
-			return
-		}
-
-		list, err := HistoryCommandStd(historyCmd)
-
-		if err != nil {
-			return
-		}
-
-		json.NewEncoder(os.Stdout).Encode(list)
-
-	},
-}
-
-func HistoryCmdByFile(file *os.File) ([]string, error) {
-	history, err := io.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-	historyStr := string(history)
-	return strings.Split(historyStr, "\n"), nil
-}
-
-func HistoryCommandStd(cmdList []string) ([]command.Result, error) {
-
-	c := genContainer.Client()
-	ContainerName := rand.String(5)
-	attachContainer, err := genContainer.CreateAttachContainer(c,
-		genContainer.CreateBuildAndContainerOptions{
-			Tag:           "debugger:0.2",
-			ContainerName: ContainerName,
-			Cmd:           "/bin/sh",
-			Tty:           false,
+		historyPath := "bash_history"
+		os.Create(historyPath)
+		defer os.Remove(historyPath)
+		co, err := genContainer.NewContainer(genContainer.Client(), genContainer.CreateBuildAndContainerOptions{
+			Tag: "debugger:0.2",
+			Cmd: "/bin/sh",
+			Tty: true,
 			Mounts: map[string]string{
-				"bash_history": "/root/.bash_history",
+				historyPath: "/root/.bash_history",
 			},
 			Env: []string{
 				"HISTFILE=/root/.bash_history",
@@ -82,28 +45,55 @@ func HistoryCommandStd(cmdList []string) ([]command.Result, error) {
 			DockerFile: "./Dockerfile",
 		})
 
-	if err != nil {
-		return nil, err
-	}
-	executor, err := command.NewStreamedContainerExecutor(c, ContainerName, attachContainer.Conn)
-	if err != nil {
-		return nil, err
-	}
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-	r, err := runner.NewPlayBackRunner(&runner.PlayBackRunnerOptions{
-		Executor: executor,
-	})
+		raw, err := term.MakeRaw(os.Stdin.Fd())
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-	if err != nil {
+		go copy.Copy(co.AttachContainer.Conn, os.Stdin)
+		copy.Copy(os.Stdout, co.AttachContainer.Reader)
+		term.RestoreTerminal(os.Stdin.Fd(), raw)
 
-	}
-	results, err := r.PlayBack(cmdList)
-	if err != nil {
-		return nil, err
-	}
+		co.Close()
+		c := recorder.NewContainer(co, historyPath)
 
-	return results, nil
+		co1, err := genContainer.NewContainer(genContainer.Client(), genContainer.CreateBuildAndContainerOptions{
+			Tag: "debugger:0.2",
+			Cmd: "/bin/sh",
+			Tty: false,
+			Mounts: map[string]string{
+				historyPath: "/root/.bash_history",
+			},
+			Env: []string{
+				"HISTFILE=/root/.bash_history",
+				"HISTSIZE=10000",
+				"HISTFILESIZE=20000",
+			},
+			DockerFile: "./Dockerfile",
+		})
 
+		pb, err := playback.NewContainer(co1)
+
+		if err != nil {
+			return
+		}
+
+		r := runner.NewDockRunner(c, pb)
+		data, err := r.Run()
+
+		if err != nil {
+			return
+		}
+
+		json.NewEncoder(os.Stdout).Encode(&data)
+
+	},
 }
 
 func init() {
