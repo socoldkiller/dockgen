@@ -4,7 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package main
 
 import (
-	"dockgen/cmd"
+	"dockgen/cmd/cli"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -50,5 +50,5 @@ func setupLogRus() {
 
 func main() {
 	setupLogRus()
-	cmd.Execute()
+	cli.Execute()
 }

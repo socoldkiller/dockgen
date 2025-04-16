@@ -1,21 +1,21 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cli
 
 import (
 	genContainer "dockgen/gen-container"
+
 	"dockgen/pkg/command"
-	"dockgen/pkg/policy/matcher"
+
 	"dockgen/pkg/rand"
-	"dockgen/pkg/rule"
-	convert "dockgen/pkg/util"
+
+	runner "dockgen/pkg/util"
 	"encoding/json"
 	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"strings"
-	"time"
 )
 
 // historyCmd represents the history command
@@ -49,8 +49,6 @@ to quickly create a Cobra application.`,
 
 		json.NewEncoder(os.Stdout).Encode(list)
 
-		time.Sleep(2 * time.Second)
-
 	},
 }
 
@@ -63,7 +61,7 @@ func HistoryCmdByFile(file *os.File) ([]string, error) {
 	return strings.Split(historyStr, "\n"), nil
 }
 
-func HistoryCommandStd(cmds []string) ([]command.Result, error) {
+func HistoryCommandStd(cmdList []string) ([]command.Result, error) {
 
 	c := genContainer.Client()
 	ContainerName := rand.String(5)
@@ -87,33 +85,21 @@ func HistoryCommandStd(cmds []string) ([]command.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	executor, err := command.NewStreamedContainerExecutor(c, ContainerName, attachContainer.Conn)
-
 	if err != nil {
 		return nil, err
 	}
-	var f *os.File
-	if f, err = os.Open("rule.json"); err != nil {
-		return nil, err
+
+	r, err := runner.NewPlayBackRunner(&runner.PlayBackRunnerOptions{
+		Executor: executor,
+	})
+
+	if err != nil {
+
 	}
-	var rs []rule.BuiltinRule
-	if err = json.NewDecoder(f).Decode(&rs); err != nil {
+	results, err := r.PlayBack(cmdList)
+	if err != nil {
 		return nil, err
-	}
-	irs, _ := convert.CastSlice[rule.BuiltinRule, rule.Rule](rs)
-
-	m := matcher.NewRuleCmdTokenMatcher(irs)
-
-	ruleExecutor := command.NewRuleExecutor(m, executor)
-
-	var results []command.Result
-	for _, cmd := range cmds {
-		res, err := ruleExecutor.ExecuteCommand(cmd)
-		if err != nil {
-			continue
-		}
-		results = append(results, res)
 	}
 
 	return results, nil

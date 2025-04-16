@@ -2,6 +2,7 @@ package command
 
 import (
 	"bytes"
+	"dockgen/pkg/builtin"
 	"dockgen/pkg/rule"
 	"fmt"
 	"github.com/shirou/gopsutil/process"
@@ -85,7 +86,7 @@ type PipeCommandExecutor struct {
 	stdout       io.Reader
 	stderr       io.Reader
 	cmd          *exec.Cmd
-	builtinRules map[string]rule.BuiltinRule
+	builtinRules map[string]builtin.Rule
 }
 
 func NewPipeCommandExecutor(CMD string, opts ...PipeExecutorOptions) (*PipeCommandExecutor, error) {
