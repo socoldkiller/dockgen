@@ -9,10 +9,37 @@ import (
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
+	"github.com/moby/term"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
+	"github.com/sirupsen/logrus"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 )
+
+func setContainerTTYSize(cli *client.Client, containerID string) {
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGWINCH)
+
+	go func() {
+		for range sig {
+			size, err := term.GetWinsize(os.Stdin.Fd())
+			if err != nil {
+				return
+			}
+
+			err = cli.ContainerResize(context.Background(), containerID, container.ResizeOptions{
+				Height: uint(size.Height),
+				Width:  uint(size.Width),
+			})
+			if err != nil {
+				logrus.Warnf("resize error %s", err)
+			}
+		}
+	}()
+	sig <- syscall.SIGWINCH
+}
 
 type CreateBuildAndContainerOptions struct {
 	Tag           string
@@ -86,6 +113,7 @@ func NewContainer(c *client.Client, option CreateBuildAndContainerOptions) (*Con
 		return nil, err
 	}
 
+	setContainerTTYSize(c, CreateContainer.ID)
 	go closeContainerConn(c, CreateContainer.ID, attachContainer.Conn)
 
 	return &Container{
