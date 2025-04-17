@@ -70,9 +70,13 @@ var Accept ExecutionPolicy = func(e Executor, cmd string) (Result, error) {
 }
 
 var Drop ExecutionPolicy = func(e Executor, cmd string) (Result, error) {
-	return Result{}, fmt.Errorf("command dropped")
+	return Result{
+		Cmd: cmd,
+	}, fmt.Errorf("command dropped")
 }
 
 var Reject ExecutionPolicy = func(e Executor, cmd string) (Result, error) {
-	return Result{}, fmt.Errorf("command rejected")
+	return Result{
+		Cmd: cmd,
+	}, fmt.Errorf("command rejected")
 }

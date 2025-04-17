@@ -161,10 +161,14 @@ func (pipe *PipeCommandExecutor) ExecuteCommand(cmd string) (Result, error) {
 
 	case rule.ActionDrop:
 
-		return Result{}, rule.NewDropError(cmd, "blocked by rule: command dropped")
+		return Result{
+			Cmd: cmd,
+		}, rule.NewDropError(cmd, "blocked by rule: command dropped")
 
 	case rule.ActionReject:
-		return Result{}, rule.NewRejectError(cmd, "blocked by rule: command rejected")
+		return Result{
+			Cmd: cmd,
+		}, rule.NewRejectError(cmd, "blocked by rule: command rejected")
 
 	}
 
