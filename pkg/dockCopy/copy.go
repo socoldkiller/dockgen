@@ -1,4 +1,4 @@
-package copy
+package dockCopy
 
 import (
 	"github.com/sirupsen/logrus"

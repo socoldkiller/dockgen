@@ -3,7 +3,7 @@ package dockSession
 import (
 	genContainer "dockgen/gen-container"
 	"dockgen/pkg/command"
-	"dockgen/pkg/copy"
+	"dockgen/pkg/dockCopy"
 	"dockgen/pkg/playback"
 	"dockgen/pkg/recorder"
 	"dockgen/pkg/runner"
@@ -53,8 +53,8 @@ func (ds *Session) Run() ([]command.Result, error) {
 		return nil, err
 	}
 
-	go copy.Copy(interactiveContainer.AttachContainer.Conn, os.Stdin)
-	copy.Copy(os.Stdout, interactiveContainer.AttachContainer.Reader)
+	go dockCopy.Copy(interactiveContainer.AttachContainer.Conn, os.Stdin)
+	dockCopy.Copy(os.Stdout, interactiveContainer.AttachContainer.Reader)
 	interactiveContainer.Close()
 
 	rec := recorder.NewContainer(interactiveContainer, ds.historyPath)

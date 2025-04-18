@@ -5,11 +5,10 @@ package cli
 
 import (
 	genContainer "dockgen/gen-container"
-	"dockgen/pkg/copy"
-	"dockgen/pkg/playback"
+	"dockgen/pkg/dockCopy"
+	"dockgen/pkg/log"
 	"dockgen/pkg/recorder"
-	"dockgen/pkg/runner"
-	"encoding/json"
+	"dockgen/pkg/util"
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
@@ -46,45 +45,18 @@ to quickly create a Cobra application.`,
 		})
 
 		if err != nil {
-			fmt.Println(err)
-			return
+			log.Fatalf("create container error:%v", err)
 		}
 
-		go copy.Copy(co.AttachContainer.Conn, os.Stdin)
-		copy.Copy(os.Stdout, co.AttachContainer.Reader)
+		go dockCopy.Copy(co.AttachContainer.Conn, os.Stdin)
+		dockCopy.Copy(os.Stdout, co.AttachContainer.Reader)
 		co.Close()
 		c := recorder.NewContainer(co, historyPath)
-
-		co1, err := genContainer.NewContainer(genContainer.Client(), genContainer.CreateBuildAndContainerOptions{
-			Tag: "debugger:0.2",
-			Cmd: "/bin/sh",
-			Tty: false,
-			Mounts: map[string]string{
-				historyPath: "/root/.bash_history",
-			},
-			Env: []string{
-				"HISTFILE=/root/.bash_history",
-				"HISTSIZE=10000",
-				"HISTFILESIZE=20000",
-			},
-			DockerFile: "./Dockerfile",
-		})
-
-		pb, err := playback.NewContainer(co1)
-
+		cmdList, err := c.Record()
 		if err != nil {
-			return
+			log.Fatalf("record cntainer cmd error: %v", err)
 		}
-
-		r := runner.NewDockRunner(c, pb)
-		data, err := r.Run()
-
-		if err != nil {
-			return
-		}
-
-		json.NewEncoder(os.Stdout).Encode(&data)
-
+		fmt.Println(util.JSONf(cmdList))
 	},
 }
 

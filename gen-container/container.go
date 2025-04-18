@@ -2,6 +2,7 @@ package gen_container
 
 import (
 	"context"
+	"dockgen/pkg/log"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -11,7 +12,6 @@ import (
 	"github.com/docker/docker/pkg/archive"
 	"github.com/moby/term"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/sirupsen/logrus"
 	"net"
 	"os"
 	"os/signal"
@@ -34,7 +34,7 @@ func setContainerTTYSize(cli *client.Client, containerID string) {
 				Width:  uint(size.Width),
 			})
 			if err != nil {
-				logrus.Warnf("resize error %s", err)
+				log.Warnf("resize error %s", err)
 			}
 		}
 	}()
@@ -144,7 +144,7 @@ func (co *Container) CloseAttachContainer() {
 func (co *Container) Close() error {
 	if co.state != nil {
 		if err := term.RestoreTerminal(os.Stdin.Fd(), co.state); err != nil {
-			logrus.Warnf("can't restore terminal raw, error: %v", err)
+			log.Warnf("can't restore terminal raw, error: %v", err)
 		}
 	}
 	ctx := context.Background()

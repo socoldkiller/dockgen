@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"dockgen/pkg/concurrency"
-	"dockgen/pkg/copy"
+	"dockgen/pkg/dockCopy"
 	"fmt"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -64,8 +64,8 @@ func (e *StreamedContainerExecutor) ExecuteCommand(cmd string) (Result, error) {
 	}
 
 	var wg concurrency.AsyncGroup
-	wg.Do(func() { copy.Copy(outBuf, e.stdout) })
-	wg.Do(func() { copy.Copy(errBuf, e.stderr) })
+	wg.Do(func() { dockCopy.Copy(outBuf, e.stdout) })
+	wg.Do(func() { dockCopy.Copy(errBuf, e.stderr) })
 	wg.Wait()
 
 	res := Result{
