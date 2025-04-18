@@ -10,7 +10,7 @@ import (
 )
 
 type PlayBack interface {
-	PlayBack(cmdList []string) ([]command.Result, error)
+	PlayBack(cmdList []string) ([]*command.Result, error)
 }
 
 type Runner struct {
@@ -24,8 +24,8 @@ type Options struct {
 	Executor command.Executor
 }
 
-func (p Runner) PlayBack(cmdList []string) ([]command.Result, error) {
-	var results []command.Result
+func (p Runner) PlayBack(cmdList []string) ([]*command.Result, error) {
+	var results []*command.Result
 
 	for _, cmd := range cmdList {
 
@@ -33,7 +33,7 @@ func (p Runner) PlayBack(cmdList []string) ([]command.Result, error) {
 		cmdResult, _ := p.Executor.ExecuteCommand(cmd)
 		log.Infof("cmd result %s", util.JSONf(cmdResult))
 
-		results = append(results, cmdResult)
+		results = append(results, &cmdResult)
 	}
 	return results, nil
 }

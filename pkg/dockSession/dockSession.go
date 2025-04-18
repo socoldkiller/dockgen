@@ -41,7 +41,7 @@ func (ds *Session) createContainer(tty bool, raw bool) (*genContainer.Container,
 	})
 }
 
-func (ds *Session) Run() ([]command.Result, error) {
+func (ds *Session) Run() ([]*command.Result, error) {
 	_, err := os.Create(ds.historyPath)
 	if err != nil {
 		return nil, err

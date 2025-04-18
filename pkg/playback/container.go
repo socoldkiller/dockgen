@@ -36,6 +36,6 @@ func NewContainer(co *genContainer.Container) (*Container, error) {
 
 }
 
-func (c Container) PlayBack(cmdList []string) ([]command.Result, error) {
+func (c Container) PlayBack(cmdList []string) ([]*command.Result, error) {
 	return c.Runner.PlayBack(cmdList)
 }

@@ -15,7 +15,7 @@ func NewDockRunner(recorder recorder.Recorder, playback playback.PlayBack) *Dock
 	return &DockRunner{recorder: recorder, playback: playback}
 }
 
-func (r DockRunner) Run() ([]command.Result, error) {
+func (r DockRunner) Run() ([]*command.Result, error) {
 	var (
 		err     error
 		cmdList []string
