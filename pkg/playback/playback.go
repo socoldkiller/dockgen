@@ -3,6 +3,7 @@ package playback
 import (
 	"dockgen/pkg/builtin"
 	"dockgen/pkg/command"
+	"dockgen/pkg/log"
 	"dockgen/pkg/policy/matcher"
 	"dockgen/pkg/rule"
 	"dockgen/pkg/util"
@@ -26,8 +27,12 @@ type Options struct {
 func (p Runner) PlayBack(cmdList []string) ([]command.Result, error) {
 	var results []command.Result
 
-	for _, r := range cmdList {
-		cmdResult, _ := p.Executor.ExecuteCommand(r)
+	for _, cmd := range cmdList {
+
+		log.Infof("%s command start execute", cmd)
+		cmdResult, _ := p.Executor.ExecuteCommand(cmd)
+		log.Infof("cmd result %s", util.JSONf(cmdResult))
+
 		results = append(results, cmdResult)
 	}
 	return results, nil
