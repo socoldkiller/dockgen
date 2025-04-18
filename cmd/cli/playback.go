@@ -12,17 +12,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var longUsage = `The 'playback' command replays previously recorded shell commands 
+inside a Docker container, allowing you to observe and analyze command behavior 
+in a clean environment. This is useful for debugging, Dockerfile generation, 
+and reproducing issues from historical terminal sessions.
+
+Example usage:
+  dockgen playback
+
+This command mounts the recorded bash history into a new container,
+executes each command, and outputs structured results (stdout, stderr, exit code, etc).`
+
 // playbackCmd represents the playback command
 var playbackCmd = &cobra.Command{
 	Use:   "playback",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Replay recorded shell commands inside a Docker container",
+	Long:  longUsage,
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(longUsage)
 		session := dockSession.NewSession("bash_history", "debugger:0.2", "./Dockerfile", genContainer.Client())
 		result, err := session.Run()
 		if err != nil {
