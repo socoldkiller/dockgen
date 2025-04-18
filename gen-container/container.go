@@ -49,6 +49,7 @@ type CreateBuildAndContainerOptions struct {
 	Env           []string
 	Tty           bool
 	Mounts        map[string]string
+	Raw           bool
 }
 
 type Container struct {
@@ -58,6 +59,7 @@ type Container struct {
 	Client          *client.Client
 
 	closed chan error
+	state  *term.State
 }
 
 func NewContainer(c *client.Client, option CreateBuildAndContainerOptions) (*Container, error) {
@@ -114,6 +116,14 @@ func NewContainer(c *client.Client, option CreateBuildAndContainerOptions) (*Con
 	}
 
 	setContainerTTYSize(c, CreateContainer.ID)
+	var state *term.State
+	if option.Raw {
+		state, err = term.MakeRaw(os.Stdin.Fd())
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	go closeContainerConn(c, CreateContainer.ID, attachContainer.Conn)
 
 	return &Container{
@@ -122,6 +132,7 @@ func NewContainer(c *client.Client, option CreateBuildAndContainerOptions) (*Con
 		Option:          option,
 		Client:          c,
 		closed:          make(chan error, 1),
+		state:           state,
 	}, nil
 
 }
@@ -131,6 +142,11 @@ func (co *Container) CloseAttachContainer() {
 }
 
 func (co *Container) Close() error {
+	if co.state != nil {
+		if err := term.RestoreTerminal(os.Stdin.Fd(), co.state); err != nil {
+			logrus.Warnf("can't restore terminal raw, error: %v", err)
+		}
+	}
 	ctx := context.Background()
 	err := co.Client.ContainerRemove(ctx, co.CreateContainer.ID, container.RemoveOptions{
 		Force: true,

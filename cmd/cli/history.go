@@ -11,7 +11,6 @@ import (
 	"dockgen/pkg/runner"
 	"encoding/json"
 	"fmt"
-	"github.com/moby/term"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -43,6 +42,7 @@ to quickly create a Cobra application.`,
 				"HISTFILESIZE=20000",
 			},
 			DockerFile: "./Dockerfile",
+			Raw:        true,
 		})
 
 		if err != nil {
@@ -50,16 +50,8 @@ to quickly create a Cobra application.`,
 			return
 		}
 
-		raw, err := term.MakeRaw(os.Stdin.Fd())
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
 		go copy.Copy(co.AttachContainer.Conn, os.Stdin)
 		copy.Copy(os.Stdout, co.AttachContainer.Reader)
-		term.RestoreTerminal(os.Stdin.Fd(), raw)
-
 		co.Close()
 		c := recorder.NewContainer(co, historyPath)
 
