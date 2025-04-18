@@ -1,0 +1,18 @@
+[
+  {
+    "cmd": "vi *",
+    "action": "drop"
+  },
+  {
+    "cmd": "vim *",
+    "action": "drop"
+  },
+  {
+    "cmd": "exit *",
+    "action": "drop"
+  },
+  {
+    "cmd": "",
+    "action": "drop"
+  }
+]
