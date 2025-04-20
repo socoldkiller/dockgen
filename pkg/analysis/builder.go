@@ -1,6 +1,8 @@
 package analysis
 
-import "dockgen/pkg/command"
+import (
+	"dockgen/pkg/command"
+)
 
 type IRBuilder interface {
 	Build([]*command.Result) ([]*CommandIR, error)

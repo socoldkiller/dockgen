@@ -1,6 +1,8 @@
 package analysis
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Analyzer struct {
 	cmdReader CmdReader
