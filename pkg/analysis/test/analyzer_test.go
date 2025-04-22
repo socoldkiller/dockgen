@@ -7,16 +7,17 @@ import (
 	"dockgen/pkg/command"
 	"dockgen/pkg/log"
 	"dockgen/pkg/util"
+	"encoding/json"
+	"os"
 	"os/exec"
 	"strings"
 	"testing"
-	"time"
 )
 
-type MockPlayBack struct {
+type MockOSBackendPlayBack struct {
 }
 
-func (m MockPlayBack) PlayBack(cmdList []string) ([]*command.Result, error) {
+func (m MockOSBackendPlayBack) PlayBack(cmdList []string) ([]*command.Result, error) {
 
 	var res []*command.Result
 	for _, c := range cmdList {
@@ -42,11 +43,32 @@ func (m MockPlayBack) PlayBack(cmdList []string) ([]*command.Result, error) {
 	return res, nil
 }
 
+type MockFileJSONPlayBack struct {
+	file string
+}
+
+func (m MockFileJSONPlayBack) PlayBack(cmdList []string) ([]*command.Result, error) {
+	f, err := os.Open(m.file)
+	if err != nil {
+		return nil, err
+	}
+	var res []*command.Result
+	err = json.NewDecoder(f).Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, err
+
+}
+
 func TestNewAnalyzer(t *testing.T) {
 
-	playback := &MockPlayBack{}
+	playback := &MockFileJSONPlayBack{
+		file: "playback.json",
+	}
 
-	pbReader := analysis2.NewPlayBackCmdReader(playback, []string{"docker version", "pwd", "docker ps -a", "brew -h", "docker version"})
+	pbReader := analysis2.NewPlayBackCmdReader(playback, nil)
 
 	analyzer := analysis2.NewAnalyzer(pbReader, analysis2.NewCmdIRBuilder())
 
@@ -60,5 +82,4 @@ func TestNewAnalyzer(t *testing.T) {
 
 	log.Infof("%s", util.JSONf(data))
 
-	time.Sleep(1 * time.Second)
 }

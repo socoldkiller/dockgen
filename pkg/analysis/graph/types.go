@@ -1,7 +1,7 @@
 package analysis
 
 import (
-	"dockgen/pkg/analysis"
+	"dockgen/pkg/analysis/ir"
 )
 
 type GraphBuilder interface {
@@ -11,15 +11,15 @@ type GraphBuilder interface {
 type IRGraph interface {
 	Init() error
 	Build([]GraphBuilder) error
-	Nodes() map[int]*analysis.CommandIR
+	Nodes() map[int]*ir.BashCommandIR
 	Edges() map[int][]*BaseEdge
-	CmdList() []*analysis.CommandIR
+	CmdList() []*ir.BashCommandIR
 }
 type BaseGraphBuilder struct{}
 
 type BaseIRGraph struct {
-	irs      []*analysis.CommandIR
-	nodes    map[int]*analysis.CommandIR
+	irs      []*ir.BashCommandIR
+	nodes    map[int]*ir.BashCommandIR
 	edges    map[int][]*BaseEdge
 	builders []GraphBuilder
 }

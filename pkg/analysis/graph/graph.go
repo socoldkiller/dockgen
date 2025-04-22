@@ -1,7 +1,7 @@
 package analysis
 
 import (
-	"dockgen/pkg/analysis"
+	"dockgen/pkg/analysis/ir"
 	"slices"
 )
 
@@ -18,7 +18,7 @@ func initEdge(g *BaseIRGraph) {
 	}
 }
 
-func (g *BaseIRGraph) Nodes() map[int]*analysis.CommandIR {
+func (g *BaseIRGraph) Nodes() map[int]*ir.BashCommandIR {
 	return g.nodes
 }
 
@@ -26,7 +26,7 @@ func (g *BaseIRGraph) Edges() map[int][]*BaseEdge {
 	return g.edges
 }
 
-func (g *BaseIRGraph) CmdList() []*analysis.CommandIR {
+func (g *BaseIRGraph) CmdList() []*ir.BashCommandIR {
 	return g.irs
 }
 
@@ -41,18 +41,18 @@ func (g *BaseIRGraph) Build(builders []GraphBuilder) error {
 	return nil
 }
 
-func NewIRGraph(cmdList []*analysis.CommandIR) *BaseIRGraph {
+func NewIRGraph(cmdList []*ir.BashCommandIR) *BaseIRGraph {
 	g := &BaseIRGraph{
 		irs:   cmdList,
-		nodes: make(map[int]*analysis.CommandIR),
+		nodes: make(map[int]*ir.BashCommandIR),
 		edges: make(map[int][]*BaseEdge),
 	}
 	return g
 }
 
-func (g *BaseIRGraph) GetTagGroup(from int, tag string) []*analysis.CommandIR {
+func (g *BaseIRGraph) GetTagGroup(from int, tag string) []*ir.BashCommandIR {
 	var (
-		groups []*analysis.CommandIR
+		groups []*ir.BashCommandIR
 	)
 
 	var dfs func(cur int)

@@ -1,6 +1,6 @@
 package analysis
 
-import "dockgen/pkg/analysis"
+import "dockgen/pkg/analysis/ir"
 
 type FamilyGraphBuilder struct{}
 
@@ -11,10 +11,10 @@ func NewFamilyGraphBuilder() *FamilyGraphBuilder {
 func (b *FamilyGraphBuilder) BuildEdges(graph IRGraph) {
 	nodes := graph.CmdList()
 
-	familyGroups := make(map[string][]*analysis.CommandIR)
+	familyGroups := make(map[string][]*ir.BashCommandIR)
 
 	for _, node := range nodes {
-		familyGroups[node.Raw] = append(familyGroups[node.Raw], node)
+		familyGroups[node.Program] = append(familyGroups[node.Program], node)
 	}
 
 	for _, group := range familyGroups {
