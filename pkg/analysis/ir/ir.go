@@ -69,11 +69,27 @@ func (v *IRBuilder) VisitCommand(ctx *parser.CommandContext) interface{} {
 		args = append(args, arg.GetText())
 	}
 
+	ioPut := make(map[string]*string)
+	if len(ctx.AllRedir()) != 0 {
+		last := ctx.AllRedir()[len(ctx.AllRedir())-1]
+		var text string
+		text = last.WORD().GetText()
+		if last.LT() != nil {
+			ioPut["input"] = &text
+		}
+
+		if last.GT() != nil {
+			ioPut["output"] = &text
+		}
+	}
+
 	ir := &BashCommandIR{
 		Program: Program,
 		Options: cmdOptions,
 		Args:    args,
 		Env:     nil,
+		Input:   ioPut["input"],
+		Output:  ioPut["output"],
 	}
 
 	if assign == nil || assign.GetChildCount() != 3 {
@@ -89,7 +105,6 @@ func (v *IRBuilder) VisitCommand(ctx *parser.CommandContext) interface{} {
 		value.Name = assign.Variable().GetText()
 		value.Value = ""
 	default:
-
 	}
 
 	env.EnvValue = value
