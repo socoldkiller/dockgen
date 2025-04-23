@@ -5,9 +5,21 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+func DefaultParseValue(val antlr.ParseTree) string {
+	if val == nil {
+		return ""
+	}
+	return val.GetText()
+}
+
+type Variable struct {
+	Name  string
+	Value string
+}
+
 type Env struct {
-	Var string
-	Val string
+	EnvVariable string
+	EnvValue    Variable
 }
 
 type BashCommandIR struct {
@@ -21,7 +33,7 @@ type BashCommandIR struct {
 	Input       *string
 	Output      *string
 	Redir       string
-	env         Env
+	Env         *Env
 }
 
 type IRBuilder struct {
@@ -40,7 +52,10 @@ func (v *IRBuilder) Visit(tree antlr.ParseTree) interface{} {
 }
 
 func (v *IRBuilder) VisitCommandLine(ctx *parser.CommandLineContext) interface{} {
-	return v.Visit(ctx.Pipeline())
+	if ctx.Pipeline() != nil {
+		return v.Visit(ctx.Pipeline())
+	}
+	return &BashCommandIR{}
 }
 
 func (v *IRBuilder) VisitPipeline(ctx *parser.PipelineContext) interface{} {
@@ -59,13 +74,17 @@ func (v *IRBuilder) VisitPipeline(ctx *parser.PipelineContext) interface{} {
 }
 
 func (v *IRBuilder) VisitCommand(ctx *parser.CommandContext) interface{} {
-	Program := ctx.Prog().GetText()
+	var (
+		env        Env
+		Program    = ctx.Prog().GetText()
+		options    = ctx.AllOptionWithArg()
+		assign     = ctx.Assign()
+		cmdOptions = make(map[string]string)
+	)
 
-	options := ctx.AllOptionWithArg()
-	cmdOptions := make(map[string]string)
 	for _, opt := range options {
 		key := opt.Option().GetText()
-		value := opt.Arg().GetText()
+		value := DefaultParseValue(opt.Arg())
 		cmdOptions[key] = value
 	}
 
@@ -74,18 +93,31 @@ func (v *IRBuilder) VisitCommand(ctx *parser.CommandContext) interface{} {
 		args = append(args, arg.GetText())
 	}
 
-	var env Env
-
-	if ctx.Assign() != nil {
-		assign := ctx.Assign()
-		env.Var = assign.WORD(0).GetText()
-		env.Val = assign.WORD(1).GetText()
-	}
-
-	return &BashCommandIR{
+	ir := &BashCommandIR{
 		Program: Program,
 		Options: cmdOptions,
 		Args:    args,
-		env:     env,
+		Env:     nil,
 	}
+
+	if assign == nil || assign.GetChildCount() != 3 {
+		return ir
+	}
+
+	env.EnvVariable = assign.WORD(0).GetText()
+	var value Variable
+	switch val := assign.GetChild(2).(type) {
+	case *antlr.TerminalNodeImpl:
+		value.Value = val.GetText()
+	case *parser.VariableContext:
+		value.Name = assign.Variable().GetText()
+		value.Value = ""
+	default:
+
+	}
+
+	env.EnvValue = value
+	ir.Env = &env
+	return ir
+
 }

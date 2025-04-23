@@ -33,51 +33,63 @@ var BashParserStaticData struct {
 func bashParserInit() {
 	staticData := &BashParserStaticData
 	staticData.LiteralNames = []string{
-		"", "'='", "'|'", "'<'", "'>'", "'>>'", "'<>'", "'&&'", "'||'", "';'",
+		"", "'$'", "'('", "')'", "'='", "'|'", "'<'", "'>'", "'>>'", "'<>'",
+		"'&&'", "'||'", "';'",
 	}
 	staticData.SymbolicNames = []string{
-		"", "ASSIGN", "PIPE", "LT", "GT", "DGT", "LTGT", "ANDAND", "OROR", "SEMI",
-		"OPTION", "WORD", "WS",
+		"", "", "", "", "ASSIGN", "PIPE", "LT", "GT", "DGT", "LTGT", "ANDAND",
+		"OROR", "SEMI", "OPTION", "WORD", "WS",
 	}
 	staticData.RuleNames = []string{
 		"commandLine", "pipeline", "optionWithArg", "command", "prog", "option",
-		"arg", "redir", "logicalOp", "assign",
+		"arg", "redir", "variable", "logicalOp", "assign",
 	}
 	staticData.PredictionContextCache = antlr.NewPredictionContextCache()
 	staticData.serializedATN = []int32{
-		4, 1, 12, 86, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
-		4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 1, 0, 1,
-		0, 1, 0, 1, 1, 1, 1, 1, 1, 5, 1, 27, 8, 1, 10, 1, 12, 1, 30, 9, 1, 1, 2,
-		1, 2, 3, 2, 34, 8, 2, 1, 3, 1, 3, 1, 3, 1, 3, 5, 3, 40, 8, 3, 10, 3, 12,
-		3, 43, 9, 3, 1, 3, 1, 3, 5, 3, 47, 8, 3, 10, 3, 12, 3, 50, 9, 3, 1, 3,
-		5, 3, 53, 8, 3, 10, 3, 12, 3, 56, 9, 3, 1, 3, 5, 3, 59, 8, 3, 10, 3, 12,
-		3, 62, 9, 3, 1, 3, 1, 3, 1, 3, 3, 3, 67, 8, 3, 3, 3, 69, 8, 3, 1, 4, 1,
-		4, 1, 5, 1, 5, 1, 6, 1, 6, 1, 7, 1, 7, 1, 7, 1, 8, 1, 8, 1, 9, 1, 9, 1,
-		9, 1, 9, 1, 9, 0, 0, 10, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 0, 2, 1, 0,
-		3, 6, 1, 0, 7, 9, 83, 0, 20, 1, 0, 0, 0, 2, 23, 1, 0, 0, 0, 4, 31, 1, 0,
-		0, 0, 6, 68, 1, 0, 0, 0, 8, 70, 1, 0, 0, 0, 10, 72, 1, 0, 0, 0, 12, 74,
-		1, 0, 0, 0, 14, 76, 1, 0, 0, 0, 16, 79, 1, 0, 0, 0, 18, 81, 1, 0, 0, 0,
-		20, 21, 3, 2, 1, 0, 21, 22, 5, 0, 0, 1, 22, 1, 1, 0, 0, 0, 23, 28, 3, 6,
-		3, 0, 24, 25, 5, 2, 0, 0, 25, 27, 3, 6, 3, 0, 26, 24, 1, 0, 0, 0, 27, 30,
-		1, 0, 0, 0, 28, 26, 1, 0, 0, 0, 28, 29, 1, 0, 0, 0, 29, 3, 1, 0, 0, 0,
-		30, 28, 1, 0, 0, 0, 31, 33, 3, 10, 5, 0, 32, 34, 3, 12, 6, 0, 33, 32, 1,
-		0, 0, 0, 33, 34, 1, 0, 0, 0, 34, 5, 1, 0, 0, 0, 35, 36, 3, 8, 4, 0, 36,
-		37, 3, 18, 9, 0, 37, 69, 1, 0, 0, 0, 38, 40, 3, 14, 7, 0, 39, 38, 1, 0,
-		0, 0, 40, 43, 1, 0, 0, 0, 41, 39, 1, 0, 0, 0, 41, 42, 1, 0, 0, 0, 42, 44,
-		1, 0, 0, 0, 43, 41, 1, 0, 0, 0, 44, 48, 3, 8, 4, 0, 45, 47, 3, 4, 2, 0,
-		46, 45, 1, 0, 0, 0, 47, 50, 1, 0, 0, 0, 48, 46, 1, 0, 0, 0, 48, 49, 1,
-		0, 0, 0, 49, 54, 1, 0, 0, 0, 50, 48, 1, 0, 0, 0, 51, 53, 3, 12, 6, 0, 52,
-		51, 1, 0, 0, 0, 53, 56, 1, 0, 0, 0, 54, 52, 1, 0, 0, 0, 54, 55, 1, 0, 0,
-		0, 55, 60, 1, 0, 0, 0, 56, 54, 1, 0, 0, 0, 57, 59, 3, 14, 7, 0, 58, 57,
-		1, 0, 0, 0, 59, 62, 1, 0, 0, 0, 60, 58, 1, 0, 0, 0, 60, 61, 1, 0, 0, 0,
-		61, 66, 1, 0, 0, 0, 62, 60, 1, 0, 0, 0, 63, 64, 3, 16, 8, 0, 64, 65, 3,
-		6, 3, 0, 65, 67, 1, 0, 0, 0, 66, 63, 1, 0, 0, 0, 66, 67, 1, 0, 0, 0, 67,
-		69, 1, 0, 0, 0, 68, 35, 1, 0, 0, 0, 68, 41, 1, 0, 0, 0, 69, 7, 1, 0, 0,
-		0, 70, 71, 5, 11, 0, 0, 71, 9, 1, 0, 0, 0, 72, 73, 5, 10, 0, 0, 73, 11,
-		1, 0, 0, 0, 74, 75, 5, 11, 0, 0, 75, 13, 1, 0, 0, 0, 76, 77, 7, 0, 0, 0,
-		77, 78, 5, 11, 0, 0, 78, 15, 1, 0, 0, 0, 79, 80, 7, 1, 0, 0, 80, 17, 1,
-		0, 0, 0, 81, 82, 5, 11, 0, 0, 82, 83, 5, 1, 0, 0, 83, 84, 5, 11, 0, 0,
-		84, 19, 1, 0, 0, 0, 8, 28, 33, 41, 48, 54, 60, 66, 68,
+		4, 1, 15, 109, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
+		4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7,
+		10, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0, 27, 8, 0, 1, 1, 1, 1, 1, 1, 5, 1, 32,
+		8, 1, 10, 1, 12, 1, 35, 9, 1, 1, 2, 1, 2, 3, 2, 39, 8, 2, 1, 3, 1, 3, 1,
+		3, 1, 3, 5, 3, 45, 8, 3, 10, 3, 12, 3, 48, 9, 3, 1, 3, 1, 3, 5, 3, 52,
+		8, 3, 10, 3, 12, 3, 55, 9, 3, 1, 3, 5, 3, 58, 8, 3, 10, 3, 12, 3, 61, 9,
+		3, 1, 3, 5, 3, 64, 8, 3, 10, 3, 12, 3, 67, 9, 3, 1, 3, 1, 3, 1, 3, 3, 3,
+		72, 8, 3, 3, 3, 74, 8, 3, 1, 4, 1, 4, 1, 5, 1, 5, 1, 6, 1, 6, 3, 6, 82,
+		8, 6, 1, 7, 1, 7, 1, 7, 1, 8, 1, 8, 5, 8, 89, 8, 8, 10, 8, 12, 8, 92, 9,
+		8, 1, 8, 1, 8, 5, 8, 96, 8, 8, 10, 8, 12, 8, 99, 9, 8, 1, 9, 1, 9, 1, 10,
+		1, 10, 1, 10, 1, 10, 3, 10, 107, 8, 10, 1, 10, 0, 0, 11, 0, 2, 4, 6, 8,
+		10, 12, 14, 16, 18, 20, 0, 2, 1, 0, 6, 9, 1, 0, 10, 12, 110, 0, 26, 1,
+		0, 0, 0, 2, 28, 1, 0, 0, 0, 4, 36, 1, 0, 0, 0, 6, 73, 1, 0, 0, 0, 8, 75,
+		1, 0, 0, 0, 10, 77, 1, 0, 0, 0, 12, 81, 1, 0, 0, 0, 14, 83, 1, 0, 0, 0,
+		16, 86, 1, 0, 0, 0, 18, 100, 1, 0, 0, 0, 20, 102, 1, 0, 0, 0, 22, 23, 3,
+		2, 1, 0, 23, 24, 5, 0, 0, 1, 24, 27, 1, 0, 0, 0, 25, 27, 5, 0, 0, 1, 26,
+		22, 1, 0, 0, 0, 26, 25, 1, 0, 0, 0, 27, 1, 1, 0, 0, 0, 28, 33, 3, 6, 3,
+		0, 29, 30, 5, 5, 0, 0, 30, 32, 3, 6, 3, 0, 31, 29, 1, 0, 0, 0, 32, 35,
+		1, 0, 0, 0, 33, 31, 1, 0, 0, 0, 33, 34, 1, 0, 0, 0, 34, 3, 1, 0, 0, 0,
+		35, 33, 1, 0, 0, 0, 36, 38, 3, 10, 5, 0, 37, 39, 3, 12, 6, 0, 38, 37, 1,
+		0, 0, 0, 38, 39, 1, 0, 0, 0, 39, 5, 1, 0, 0, 0, 40, 41, 3, 8, 4, 0, 41,
+		42, 3, 20, 10, 0, 42, 74, 1, 0, 0, 0, 43, 45, 3, 14, 7, 0, 44, 43, 1, 0,
+		0, 0, 45, 48, 1, 0, 0, 0, 46, 44, 1, 0, 0, 0, 46, 47, 1, 0, 0, 0, 47, 49,
+		1, 0, 0, 0, 48, 46, 1, 0, 0, 0, 49, 53, 3, 8, 4, 0, 50, 52, 3, 4, 2, 0,
+		51, 50, 1, 0, 0, 0, 52, 55, 1, 0, 0, 0, 53, 51, 1, 0, 0, 0, 53, 54, 1,
+		0, 0, 0, 54, 59, 1, 0, 0, 0, 55, 53, 1, 0, 0, 0, 56, 58, 3, 12, 6, 0, 57,
+		56, 1, 0, 0, 0, 58, 61, 1, 0, 0, 0, 59, 57, 1, 0, 0, 0, 59, 60, 1, 0, 0,
+		0, 60, 65, 1, 0, 0, 0, 61, 59, 1, 0, 0, 0, 62, 64, 3, 14, 7, 0, 63, 62,
+		1, 0, 0, 0, 64, 67, 1, 0, 0, 0, 65, 63, 1, 0, 0, 0, 65, 66, 1, 0, 0, 0,
+		66, 71, 1, 0, 0, 0, 67, 65, 1, 0, 0, 0, 68, 69, 3, 18, 9, 0, 69, 70, 3,
+		6, 3, 0, 70, 72, 1, 0, 0, 0, 71, 68, 1, 0, 0, 0, 71, 72, 1, 0, 0, 0, 72,
+		74, 1, 0, 0, 0, 73, 40, 1, 0, 0, 0, 73, 46, 1, 0, 0, 0, 74, 7, 1, 0, 0,
+		0, 75, 76, 5, 14, 0, 0, 76, 9, 1, 0, 0, 0, 77, 78, 5, 13, 0, 0, 78, 11,
+		1, 0, 0, 0, 79, 82, 5, 14, 0, 0, 80, 82, 3, 16, 8, 0, 81, 79, 1, 0, 0,
+		0, 81, 80, 1, 0, 0, 0, 82, 13, 1, 0, 0, 0, 83, 84, 7, 0, 0, 0, 84, 85,
+		5, 14, 0, 0, 85, 15, 1, 0, 0, 0, 86, 90, 5, 1, 0, 0, 87, 89, 5, 2, 0, 0,
+		88, 87, 1, 0, 0, 0, 89, 92, 1, 0, 0, 0, 90, 88, 1, 0, 0, 0, 90, 91, 1,
+		0, 0, 0, 91, 93, 1, 0, 0, 0, 92, 90, 1, 0, 0, 0, 93, 97, 5, 14, 0, 0, 94,
+		96, 5, 3, 0, 0, 95, 94, 1, 0, 0, 0, 96, 99, 1, 0, 0, 0, 97, 95, 1, 0, 0,
+		0, 97, 98, 1, 0, 0, 0, 98, 17, 1, 0, 0, 0, 99, 97, 1, 0, 0, 0, 100, 101,
+		7, 1, 0, 0, 101, 19, 1, 0, 0, 0, 102, 103, 5, 14, 0, 0, 103, 106, 5, 4,
+		0, 0, 104, 107, 5, 14, 0, 0, 105, 107, 3, 16, 8, 0, 106, 104, 1, 0, 0,
+		0, 106, 105, 1, 0, 0, 0, 107, 21, 1, 0, 0, 0, 13, 26, 33, 38, 46, 53, 59,
+		65, 71, 73, 81, 90, 97, 106,
 	}
 	deserializer := antlr.NewATNDeserializer(nil)
 	staticData.atn = deserializer.Deserialize(staticData.serializedATN)
@@ -116,18 +128,21 @@ func NewBashParser(input antlr.TokenStream) *BashParser {
 // BashParser tokens.
 const (
 	BashParserEOF    = antlr.TokenEOF
-	BashParserASSIGN = 1
-	BashParserPIPE   = 2
-	BashParserLT     = 3
-	BashParserGT     = 4
-	BashParserDGT    = 5
-	BashParserLTGT   = 6
-	BashParserANDAND = 7
-	BashParserOROR   = 8
-	BashParserSEMI   = 9
-	BashParserOPTION = 10
-	BashParserWORD   = 11
-	BashParserWS     = 12
+	BashParserT__0   = 1
+	BashParserT__1   = 2
+	BashParserT__2   = 3
+	BashParserASSIGN = 4
+	BashParserPIPE   = 5
+	BashParserLT     = 6
+	BashParserGT     = 7
+	BashParserDGT    = 8
+	BashParserLTGT   = 9
+	BashParserANDAND = 10
+	BashParserOROR   = 11
+	BashParserSEMI   = 12
+	BashParserOPTION = 13
+	BashParserWORD   = 14
+	BashParserWS     = 15
 )
 
 // BashParser rules.
@@ -140,8 +155,9 @@ const (
 	BashParserRULE_option        = 5
 	BashParserRULE_arg           = 6
 	BashParserRULE_redir         = 7
-	BashParserRULE_logicalOp     = 8
-	BashParserRULE_assign        = 9
+	BashParserRULE_variable      = 8
+	BashParserRULE_logicalOp     = 9
+	BashParserRULE_assign        = 10
 )
 
 // ICommandLineContext is an interface to support dynamic dispatch.
@@ -244,18 +260,42 @@ func (s *CommandLineContext) Accept(visitor antlr.ParseTreeVisitor) interface{} 
 func (p *BashParser) CommandLine() (localctx ICommandLineContext) {
 	localctx = NewCommandLineContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 0, BashParserRULE_commandLine)
-	p.EnterOuterAlt(localctx, 1)
-	{
-		p.SetState(20)
-		p.Pipeline()
+	p.SetState(26)
+	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
 	}
-	{
-		p.SetState(21)
-		p.Match(BashParserEOF)
-		if p.HasError() {
-			// Recognition error - abort rule
-			goto errorExit
+
+	switch p.GetTokenStream().LA(1) {
+	case BashParserLT, BashParserGT, BashParserDGT, BashParserLTGT, BashParserWORD:
+		p.EnterOuterAlt(localctx, 1)
+		{
+			p.SetState(22)
+			p.Pipeline()
 		}
+		{
+			p.SetState(23)
+			p.Match(BashParserEOF)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
+		}
+
+	case BashParserEOF:
+		p.EnterOuterAlt(localctx, 2)
+		{
+			p.SetState(25)
+			p.Match(BashParserEOF)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
+		}
+
+	default:
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 
 errorExit:
@@ -406,10 +446,10 @@ func (p *BashParser) Pipeline() (localctx IPipelineContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(23)
+		p.SetState(28)
 		p.Command()
 	}
-	p.SetState(28)
+	p.SetState(33)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -418,7 +458,7 @@ func (p *BashParser) Pipeline() (localctx IPipelineContext) {
 
 	for _la == BashParserPIPE {
 		{
-			p.SetState(24)
+			p.SetState(29)
 			p.Match(BashParserPIPE)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -426,11 +466,11 @@ func (p *BashParser) Pipeline() (localctx IPipelineContext) {
 			}
 		}
 		{
-			p.SetState(25)
+			p.SetState(30)
 			p.Command()
 		}
 
-		p.SetState(30)
+		p.SetState(35)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -565,15 +605,15 @@ func (p *BashParser) OptionWithArg() (localctx IOptionWithArgContext) {
 	p.EnterRule(localctx, 4, BashParserRULE_optionWithArg)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(31)
+		p.SetState(36)
 		p.Option()
 	}
-	p.SetState(33)
+	p.SetState(38)
 	p.GetErrorHandler().Sync(p)
 
-	if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 1, p.GetParserRuleContext()) == 1 {
+	if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 2, p.GetParserRuleContext()) == 1 {
 		{
-			p.SetState(32)
+			p.SetState(37)
 			p.Arg()
 		}
 
@@ -871,40 +911,40 @@ func (p *BashParser) Command() (localctx ICommandContext) {
 	p.EnterRule(localctx, 6, BashParserRULE_command)
 	var _la int
 
-	p.SetState(68)
+	p.SetState(73)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
 	}
 
-	switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 7, p.GetParserRuleContext()) {
+	switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 8, p.GetParserRuleContext()) {
 	case 1:
 		p.EnterOuterAlt(localctx, 1)
 		{
-			p.SetState(35)
+			p.SetState(40)
 			p.Prog()
 		}
 		{
-			p.SetState(36)
+			p.SetState(41)
 			p.Assign()
 		}
 
 	case 2:
 		p.EnterOuterAlt(localctx, 2)
-		p.SetState(41)
+		p.SetState(46)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&120) != 0 {
+		for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&960) != 0 {
 			{
-				p.SetState(38)
+				p.SetState(43)
 				p.Redir()
 			}
 
-			p.SetState(43)
+			p.SetState(48)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -912,10 +952,10 @@ func (p *BashParser) Command() (localctx ICommandContext) {
 			_la = p.GetTokenStream().LA(1)
 		}
 		{
-			p.SetState(44)
+			p.SetState(49)
 			p.Prog()
 		}
-		p.SetState(48)
+		p.SetState(53)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -924,71 +964,71 @@ func (p *BashParser) Command() (localctx ICommandContext) {
 
 		for _la == BashParserOPTION {
 			{
-				p.SetState(45)
+				p.SetState(50)
 				p.OptionWithArg()
 			}
 
-			p.SetState(50)
+			p.SetState(55)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
 			}
 			_la = p.GetTokenStream().LA(1)
 		}
-		p.SetState(54)
+		p.SetState(59)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		for _la == BashParserWORD {
+		for _la == BashParserT__0 || _la == BashParserWORD {
 			{
-				p.SetState(51)
+				p.SetState(56)
 				p.Arg()
 			}
 
-			p.SetState(56)
+			p.SetState(61)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
 			}
 			_la = p.GetTokenStream().LA(1)
 		}
-		p.SetState(60)
+		p.SetState(65)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&120) != 0 {
+		for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&960) != 0 {
 			{
-				p.SetState(57)
+				p.SetState(62)
 				p.Redir()
 			}
 
-			p.SetState(62)
+			p.SetState(67)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
 			}
 			_la = p.GetTokenStream().LA(1)
 		}
-		p.SetState(66)
+		p.SetState(71)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&896) != 0 {
+		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&7168) != 0 {
 			{
-				p.SetState(63)
+				p.SetState(68)
 				p.LogicalOp()
 			}
 			{
-				p.SetState(64)
+				p.SetState(69)
 				p.Command()
 			}
 
@@ -1096,7 +1136,7 @@ func (p *BashParser) Prog() (localctx IProgContext) {
 	p.EnterRule(localctx, 8, BashParserRULE_prog)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(70)
+		p.SetState(75)
 		p.Match(BashParserWORD)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -1202,7 +1242,7 @@ func (p *BashParser) Option() (localctx IOptionContext) {
 	p.EnterRule(localctx, 10, BashParserRULE_option)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(72)
+		p.SetState(77)
 		p.Match(BashParserOPTION)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -1232,6 +1272,7 @@ type IArgContext interface {
 
 	// Getter signatures
 	WORD() antlr.TerminalNode
+	Variable() IVariableContext
 
 	// IsArgContext differentiates from other interfaces.
 	IsArgContext()
@@ -1273,6 +1314,22 @@ func (s *ArgContext) WORD() antlr.TerminalNode {
 	return s.GetToken(BashParserWORD, 0)
 }
 
+func (s *ArgContext) Variable() IVariableContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IVariableContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IVariableContext)
+}
+
 func (s *ArgContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
@@ -1306,14 +1363,34 @@ func (s *ArgContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 func (p *BashParser) Arg() (localctx IArgContext) {
 	localctx = NewArgContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 12, BashParserRULE_arg)
-	p.EnterOuterAlt(localctx, 1)
-	{
-		p.SetState(74)
-		p.Match(BashParserWORD)
-		if p.HasError() {
-			// Recognition error - abort rule
-			goto errorExit
+	p.SetState(81)
+	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
+
+	switch p.GetTokenStream().LA(1) {
+	case BashParserWORD:
+		p.EnterOuterAlt(localctx, 1)
+		{
+			p.SetState(79)
+			p.Match(BashParserWORD)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
+
+	case BashParserT__0:
+		p.EnterOuterAlt(localctx, 2)
+		{
+			p.SetState(80)
+			p.Variable()
+		}
+
+	default:
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 
 errorExit:
@@ -1436,10 +1513,10 @@ func (p *BashParser) Redir() (localctx IRedirContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(76)
+		p.SetState(83)
 		_la = p.GetTokenStream().LA(1)
 
-		if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&120) != 0) {
+		if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&960) != 0) {
 			p.GetErrorHandler().RecoverInline(p)
 		} else {
 			p.GetErrorHandler().ReportMatch(p)
@@ -1447,12 +1524,176 @@ func (p *BashParser) Redir() (localctx IRedirContext) {
 		}
 	}
 	{
-		p.SetState(77)
+		p.SetState(84)
 		p.Match(BashParserWORD)
 		if p.HasError() {
 			// Recognition error - abort rule
 			goto errorExit
 		}
+	}
+
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
+	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
+}
+
+// IVariableContext is an interface to support dynamic dispatch.
+type IVariableContext interface {
+	antlr.ParserRuleContext
+
+	// GetParser returns the parser.
+	GetParser() antlr.Parser
+
+	// Getter signatures
+	WORD() antlr.TerminalNode
+
+	// IsVariableContext differentiates from other interfaces.
+	IsVariableContext()
+}
+
+type VariableContext struct {
+	antlr.BaseParserRuleContext
+	parser antlr.Parser
+}
+
+func NewEmptyVariableContext() *VariableContext {
+	var p = new(VariableContext)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = BashParserRULE_variable
+	return p
+}
+
+func InitEmptyVariableContext(p *VariableContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = BashParserRULE_variable
+}
+
+func (*VariableContext) IsVariableContext() {}
+
+func NewVariableContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *VariableContext {
+	var p = new(VariableContext)
+
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
+
+	p.parser = parser
+	p.RuleIndex = BashParserRULE_variable
+
+	return p
+}
+
+func (s *VariableContext) GetParser() antlr.Parser { return s.parser }
+
+func (s *VariableContext) WORD() antlr.TerminalNode {
+	return s.GetToken(BashParserWORD, 0)
+}
+
+func (s *VariableContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *VariableContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
+	return antlr.TreesStringTree(s, ruleNames, recog)
+}
+
+func (s *VariableContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(BashListener); ok {
+		listenerT.EnterVariable(s)
+	}
+}
+
+func (s *VariableContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(BashListener); ok {
+		listenerT.ExitVariable(s)
+	}
+}
+
+func (s *VariableContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case BashVisitor:
+		return t.VisitVariable(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
+func (p *BashParser) Variable() (localctx IVariableContext) {
+	localctx = NewVariableContext(p, p.GetParserRuleContext(), p.GetState())
+	p.EnterRule(localctx, 16, BashParserRULE_variable)
+	var _la int
+
+	p.EnterOuterAlt(localctx, 1)
+	{
+		p.SetState(86)
+		p.Match(BashParserT__0)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
+	}
+	p.SetState(90)
+	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
+	_la = p.GetTokenStream().LA(1)
+
+	for _la == BashParserT__1 {
+		{
+			p.SetState(87)
+			p.Match(BashParserT__1)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
+		}
+
+		p.SetState(92)
+		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
+		_la = p.GetTokenStream().LA(1)
+	}
+	{
+		p.SetState(93)
+		p.Match(BashParserWORD)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
+	}
+	p.SetState(97)
+	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
+	_la = p.GetTokenStream().LA(1)
+
+	for _la == BashParserT__2 {
+		{
+			p.SetState(94)
+			p.Match(BashParserT__2)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
+		}
+
+		p.SetState(99)
+		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
+		_la = p.GetTokenStream().LA(1)
 	}
 
 errorExit:
@@ -1560,15 +1801,15 @@ func (s *LogicalOpContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 
 func (p *BashParser) LogicalOp() (localctx ILogicalOpContext) {
 	localctx = NewLogicalOpContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 16, BashParserRULE_logicalOp)
+	p.EnterRule(localctx, 18, BashParserRULE_logicalOp)
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(79)
+		p.SetState(100)
 		_la = p.GetTokenStream().LA(1)
 
-		if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&896) != 0) {
+		if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&7168) != 0) {
 			p.GetErrorHandler().RecoverInline(p)
 		} else {
 			p.GetErrorHandler().ReportMatch(p)
@@ -1600,6 +1841,7 @@ type IAssignContext interface {
 	AllWORD() []antlr.TerminalNode
 	WORD(i int) antlr.TerminalNode
 	ASSIGN() antlr.TerminalNode
+	Variable() IVariableContext
 
 	// IsAssignContext differentiates from other interfaces.
 	IsAssignContext()
@@ -1649,6 +1891,22 @@ func (s *AssignContext) ASSIGN() antlr.TerminalNode {
 	return s.GetToken(BashParserASSIGN, 0)
 }
 
+func (s *AssignContext) Variable() IVariableContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IVariableContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IVariableContext)
+}
+
 func (s *AssignContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
@@ -1681,10 +1939,10 @@ func (s *AssignContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 
 func (p *BashParser) Assign() (localctx IAssignContext) {
 	localctx = NewAssignContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 18, BashParserRULE_assign)
+	p.EnterRule(localctx, 20, BashParserRULE_assign)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(81)
+		p.SetState(102)
 		p.Match(BashParserWORD)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -1692,20 +1950,39 @@ func (p *BashParser) Assign() (localctx IAssignContext) {
 		}
 	}
 	{
-		p.SetState(82)
+		p.SetState(103)
 		p.Match(BashParserASSIGN)
 		if p.HasError() {
 			// Recognition error - abort rule
 			goto errorExit
 		}
 	}
-	{
-		p.SetState(83)
-		p.Match(BashParserWORD)
-		if p.HasError() {
-			// Recognition error - abort rule
-			goto errorExit
+	p.SetState(106)
+	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
+
+	switch p.GetTokenStream().LA(1) {
+	case BashParserWORD:
+		{
+			p.SetState(104)
+			p.Match(BashParserWORD)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
+
+	case BashParserT__0:
+		{
+			p.SetState(105)
+			p.Variable()
+		}
+
+	default:
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 
 errorExit:

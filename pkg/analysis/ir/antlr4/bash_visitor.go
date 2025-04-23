@@ -32,6 +32,9 @@ type BashVisitor interface {
 	// Visit a parse tree produced by BashParser#redir.
 	VisitRedir(ctx *RedirContext) interface{}
 
+	// Visit a parse tree produced by BashParser#variable.
+	VisitVariable(ctx *VariableContext) interface{}
+
 	// Visit a parse tree produced by BashParser#logicalOp.
 	VisitLogicalOp(ctx *LogicalOpContext) interface{}
 

@@ -2,7 +2,7 @@ grammar Bash;
 
 commandLine
     : pipeline EOF
-    ;
+    | EOF;
 
 pipeline
     : command (PIPE command)*
@@ -27,10 +27,15 @@ option
 
 arg
     : WORD
+    | variable
     ;
 
 redir
     : (LT | GT | DGT | LTGT) WORD
+    ;
+
+variable
+    : '$' '('* WORD ')'*
     ;
 
 logicalOp
@@ -40,7 +45,7 @@ logicalOp
     ;
 
 assign
-    : WORD ASSIGN WORD
+    : WORD ASSIGN (WORD | variable)
     ;
 
 

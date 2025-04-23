@@ -69,6 +69,12 @@ func (s *BaseBashListener) EnterRedir(ctx *RedirContext) {}
 // ExitRedir is called when production redir is exited.
 func (s *BaseBashListener) ExitRedir(ctx *RedirContext) {}
 
+// EnterVariable is called when production variable is entered.
+func (s *BaseBashListener) EnterVariable(ctx *VariableContext) {}
+
+// ExitVariable is called when production variable is exited.
+func (s *BaseBashListener) ExitVariable(ctx *VariableContext) {}
+
 // EnterLogicalOp is called when production logicalOp is entered.
 func (s *BaseBashListener) EnterLogicalOp(ctx *LogicalOpContext) {}
 

@@ -32,6 +32,9 @@ type BashListener interface {
 	// EnterRedir is called when entering the redir production.
 	EnterRedir(c *RedirContext)
 
+	// EnterVariable is called when entering the variable production.
+	EnterVariable(c *VariableContext)
+
 	// EnterLogicalOp is called when entering the logicalOp production.
 	EnterLogicalOp(c *LogicalOpContext)
 
@@ -61,6 +64,9 @@ type BashListener interface {
 
 	// ExitRedir is called when exiting the redir production.
 	ExitRedir(c *RedirContext)
+
+	// ExitVariable is called when exiting the variable production.
+	ExitVariable(c *VariableContext)
 
 	// ExitLogicalOp is called when exiting the logicalOp production.
 	ExitLogicalOp(c *LogicalOpContext)

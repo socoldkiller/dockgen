@@ -40,6 +40,10 @@ func (v *BaseBashVisitor) VisitRedir(ctx *RedirContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseBashVisitor) VisitVariable(ctx *VariableContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseBashVisitor) VisitLogicalOp(ctx *LogicalOpContext) interface{} {
 	return v.VisitChildren(ctx)
 }
