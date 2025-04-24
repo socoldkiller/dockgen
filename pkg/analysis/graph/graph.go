@@ -7,7 +7,7 @@ import (
 
 func initNodes(graph *BaseIRGraph) {
 	for _, ir := range graph.irs {
-		ID := ir.ID
+		ID := ir.ID()
 		graph.nodes[ID] = ir
 	}
 }
@@ -18,7 +18,7 @@ func initEdge(g *BaseIRGraph) {
 	}
 }
 
-func (g *BaseIRGraph) Nodes() map[int]*ir.BashCommandIR {
+func (g *BaseIRGraph) Nodes() map[int]ir.IR {
 	return g.nodes
 }
 
@@ -26,7 +26,7 @@ func (g *BaseIRGraph) Edges() map[int][]*BaseEdge {
 	return g.edges
 }
 
-func (g *BaseIRGraph) CmdList() []*ir.BashCommandIR {
+func (g *BaseIRGraph) CmdList() []ir.IR {
 	return g.irs
 }
 
@@ -41,18 +41,18 @@ func (g *BaseIRGraph) Build(builders []GraphBuilder) error {
 	return nil
 }
 
-func NewIRGraph(cmdList []*ir.BashCommandIR) *BaseIRGraph {
+func NewIRGraph(cmdList []ir.IR) *BaseIRGraph {
 	g := &BaseIRGraph{
 		irs:   cmdList,
-		nodes: make(map[int]*ir.BashCommandIR),
+		nodes: make(map[int]ir.IR),
 		edges: make(map[int][]*BaseEdge),
 	}
 	return g
 }
 
-func (g *BaseIRGraph) GetTagGroup(from int, tag string) []*ir.BashCommandIR {
+func (g *BaseIRGraph) GetTagGroup(from int, tag string) []ir.IR {
 	var (
-		groups []*ir.BashCommandIR
+		groups []ir.IR
 	)
 
 	var dfs func(cur int)

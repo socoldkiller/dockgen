@@ -11,15 +11,15 @@ type GraphBuilder interface {
 type IRGraph interface {
 	Init() error
 	Build([]GraphBuilder) error
-	Nodes() map[int]*ir.BashCommandIR
+	Nodes() map[int]ir.IR
 	Edges() map[int][]*BaseEdge
-	CmdList() []*ir.BashCommandIR
+	CmdList() []ir.IR
 }
 type BaseGraphBuilder struct{}
 
 type BaseIRGraph struct {
-	irs      []*ir.BashCommandIR
-	nodes    map[int]*ir.BashCommandIR
+	irs      []ir.IR
+	nodes    map[int]ir.IR
 	edges    map[int][]*BaseEdge
 	builders []GraphBuilder
 }

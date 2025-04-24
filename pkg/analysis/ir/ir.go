@@ -17,9 +17,14 @@ type IRBuilder struct {
 	IR *BashCommandIR
 }
 
-func NewIRBuilder() *IRBuilder {
+func NewIRBuilder(id int, cmd string, stdout, stderr *string) *IRBuilder {
 	return &IRBuilder{
-		IR: &BashCommandIR{},
+		IR: &BashCommandIR{
+			id:     id,
+			cmd:    cmd,
+			stdout: stdout,
+			stderr: stderr,
+		},
 	}
 }
 
@@ -44,7 +49,7 @@ func (v *IRBuilder) VisitPipeline(ctx *parser.PipelineContext) interface{} {
 
 	for _, cmdCtx := range commands {
 		cmd := v.Visit(cmdCtx).(*BashCommandIR)
-		v.IR.PipeCommand = append(v.IR.PipeCommand, cmd)
+		v.IR.pipeCommand = append(v.IR.pipeCommand, cmd)
 	}
 	return v.IR
 }
@@ -78,18 +83,21 @@ func (v *IRBuilder) VisitCommand(ctx *parser.CommandContext) interface{} {
 			ioPut["input"] = &text
 		}
 
-		if last.GT() != nil {
+		if last.GT() != nil || last.DGT() != nil {
 			ioPut["output"] = &text
 		}
 	}
 
 	ir := &BashCommandIR{
-		Program: Program,
-		Options: cmdOptions,
-		Args:    args,
-		Env:     nil,
-		Input:   ioPut["input"],
-		Output:  ioPut["output"],
+		id:      v.IR.id,
+		program: Program,
+		options: cmdOptions,
+		args:    args,
+		env:     nil,
+		input:   ioPut["input"],
+		output:  ioPut["output"],
+		stderr:  v.IR.stderr,
+		stdout:  v.IR.stdout,
 	}
 
 	if assign == nil || assign.GetChildCount() != 3 {
@@ -108,7 +116,7 @@ func (v *IRBuilder) VisitCommand(ctx *parser.CommandContext) interface{} {
 	}
 
 	env.EnvValue = value
-	ir.Env = &env
+	ir.env = &env
 	return ir
 
 }

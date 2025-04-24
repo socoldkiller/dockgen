@@ -11,17 +11,17 @@ func NewFamilyGraphBuilder() *FamilyGraphBuilder {
 func (b *FamilyGraphBuilder) BuildEdges(graph IRGraph) {
 	nodes := graph.CmdList()
 
-	familyGroups := make(map[string][]*ir.BashCommandIR)
+	familyGroups := make(map[string][]ir.IR)
 
 	for _, node := range nodes {
-		familyGroups[node.Program] = append(familyGroups[node.Program], node)
+		familyGroups[node.Program()] = append(familyGroups[node.Program()], node)
 	}
 
 	for _, group := range familyGroups {
 		for i := 0; i < len(group)-1; i++ {
 			from := group[i]
 			to := group[i+1]
-			BaseEdge{}.Add(graph, from.ID, to.ID, []string{"family"})
+			BaseEdge{}.Add(graph, from.ID(), to.ID(), []string{"family"})
 		}
 	}
 }
