@@ -70,7 +70,7 @@ func (v *IRVisitor) VisitCommand(ctx *parser.CommandContext) interface{} {
 	for _, arg := range ctx.AllArg() {
 		args = append(args, arg.GetText())
 	}
-
+	var redirect string
 	ioPut := make(map[string]*string)
 	if len(ctx.AllRedir()) != 0 {
 		last := ctx.AllRedir()[len(ctx.AllRedir())-1]
@@ -78,22 +78,29 @@ func (v *IRVisitor) VisitCommand(ctx *parser.CommandContext) interface{} {
 		text = last.WORD().GetText()
 		if last.LT() != nil {
 			ioPut["input"] = &text
+			redirect = last.LT().GetText()
 		}
 
 		if last.GT() != nil || last.DGT() != nil {
 			ioPut["output"] = &text
+			redirect = last.GT().GetText()
+		}
+
+		if last.DGT() != nil {
+			ioPut["output"] = &text
+			redirect = last.DGT().GetText()
 		}
 	}
 
-	ir := &AntlrCommandIR{
-		program: Program,
-		options: cmdOptions,
-		args:    args,
-		env:     nil,
-		input:   ioPut["input"],
-		output:  ioPut["output"],
+	var ir = &AntlrCommandIR{
+		program:  Program,
+		options:  cmdOptions,
+		args:     args,
+		env:      nil,
+		input:    ioPut["input"],
+		output:   ioPut["output"],
+		redirect: &redirect,
 	}
-
 	if assign == nil || assign.GetChildCount() != 3 {
 		return ir
 	}

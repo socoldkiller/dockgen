@@ -9,8 +9,8 @@ type IR interface {
 	PipeCommand() []IR
 	Options() map[string]string
 	Args() []string
-	Input() string
-	Output() string
-	Redirect() string
-	Env() Env
+	Input() *string
+	Output() *string
+	Redirect() *string
+	Env() *Env
 }

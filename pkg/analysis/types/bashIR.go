@@ -14,7 +14,7 @@ type AntlrCommandIR struct {
 	args        []string
 	input       *string
 	output      *string
-	redirect    string
+	redirect    *string
 	env         *Env
 }
 
@@ -93,20 +93,20 @@ func (ir BashCommandIR) Args() []string {
 	return ir.args
 }
 
-func (ir BashCommandIR) Input() string {
-	return *ir.input
+func (ir BashCommandIR) Input() *string {
+	return ir.input
 }
 
-func (ir BashCommandIR) Output() string {
-	return *ir.output
+func (ir BashCommandIR) Output() *string {
+	return ir.output
 }
 
-func (ir BashCommandIR) Redirect() string {
+func (ir BashCommandIR) Redirect() *string {
 	return ir.redirect
 }
 
-func (ir BashCommandIR) Env() Env {
-	return *ir.env
+func (ir BashCommandIR) Env() *Env {
+	return ir.env
 }
 
 func (ir BashCommandIR) Cmd() string {
