@@ -1,7 +1,7 @@
-package ir
+package types
 
 import (
-	parser "dockgen/pkg/analysis/ir/antlr4"
+	parser "dockgen/pkg/analysis/types/antlr4"
 	"github.com/antlr4-go/antlr/v4"
 )
 
@@ -12,49 +12,46 @@ func DefaultParseValue(val antlr.ParseTree) string {
 	return val.GetText()
 }
 
-type IRBuilder struct {
+type IRVisitor struct {
 	parser.BashVisitor
-	IR *BashCommandIR
+	defaultIR *AntlrCommandIR
 }
 
-func NewIRBuilder(id int, cmd string, stdout, stderr *string) *IRBuilder {
-	return &IRBuilder{
-		IR: &BashCommandIR{
-			id:     id,
-			cmd:    cmd,
-			stdout: stdout,
-			stderr: stderr,
-		},
+func NewIRVisitor() *IRVisitor {
+	return &IRVisitor{
+		defaultIR: &AntlrCommandIR{},
 	}
 }
 
-func (v *IRBuilder) Visit(tree antlr.ParseTree) interface{} {
+func (v *IRVisitor) Visit(tree antlr.ParseTree) interface{} {
 	return tree.Accept(v)
 }
 
-func (v *IRBuilder) VisitCommandLine(ctx *parser.CommandLineContext) interface{} {
+func (v *IRVisitor) VisitCommandLine(ctx *parser.CommandLineContext) interface{} {
 	if ctx.Pipeline() != nil {
 		return v.Visit(ctx.Pipeline())
 	}
-	return &BashCommandIR{}
+	return &AntlrCommandIR{}
 }
 
-func (v *IRBuilder) VisitPipeline(ctx *parser.PipelineContext) interface{} {
+func (v *IRVisitor) VisitPipeline(ctx *parser.PipelineContext) interface{} {
 	commands := ctx.AllCommand()
+	ir := v.defaultIR
 	if len(commands) == 1 {
-		cmd := v.Visit(commands[0]).(*BashCommandIR)
-		v.IR = cmd
-		return v.IR
+		cmd := v.Visit(commands[0]).(*AntlrCommandIR)
+		ir = cmd
+		return ir
 	}
 
 	for _, cmdCtx := range commands {
-		cmd := v.Visit(cmdCtx).(*BashCommandIR)
-		v.IR.pipeCommand = append(v.IR.pipeCommand, cmd)
+		cmd := v.Visit(cmdCtx).(*AntlrCommandIR)
+		ir.pipeCommand = append(v.defaultIR.pipeCommand, cmd)
 	}
-	return v.IR
+
+	return ir
 }
 
-func (v *IRBuilder) VisitCommand(ctx *parser.CommandContext) interface{} {
+func (v *IRVisitor) VisitCommand(ctx *parser.CommandContext) interface{} {
 	var (
 		env        Env
 		Program    = ctx.Prog().GetText()
@@ -88,16 +85,13 @@ func (v *IRBuilder) VisitCommand(ctx *parser.CommandContext) interface{} {
 		}
 	}
 
-	ir := &BashCommandIR{
-		id:      v.IR.id,
+	ir := &AntlrCommandIR{
 		program: Program,
 		options: cmdOptions,
 		args:    args,
 		env:     nil,
 		input:   ioPut["input"],
 		output:  ioPut["output"],
-		stderr:  v.IR.stderr,
-		stdout:  v.IR.stdout,
 	}
 
 	if assign == nil || assign.GetChildCount() != 3 {

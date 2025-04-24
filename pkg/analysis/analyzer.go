@@ -1,7 +1,7 @@
 package analysis
 
 import (
-	"dockgen/pkg/analysis/ir"
+	"dockgen/pkg/analysis/types"
 	"fmt"
 )
 
@@ -17,7 +17,7 @@ func NewAnalyzer(cmdReader CmdReader, builder IRBuilder) *Analyzer {
 	}
 }
 
-func (a *Analyzer) Analyze() ([]*ir.BashCommandIR, error) {
+func (a *Analyzer) Analyze() ([]types.IR, error) {
 	commands, err := a.cmdReader.Read()
 	if err != nil {
 		return nil, fmt.Errorf("read commands: %w", err)
@@ -25,7 +25,7 @@ func (a *Analyzer) Analyze() ([]*ir.BashCommandIR, error) {
 
 	irs, err := a.builder.Build(commands)
 	if err != nil {
-		return nil, fmt.Errorf("build BashCommandIR: %w", err)
+		return nil, fmt.Errorf("build AntlrCommandIR: %w", err)
 	}
 
 	return irs, nil

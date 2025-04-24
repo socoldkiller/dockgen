@@ -1,9 +1,16 @@
 package analysis
 
-func (b BaseGraphBuilder) BuildEdges(graph IRGraph) {
+import "dockgen/pkg/analysis/types"
+
+type BaseGraphBuilder struct {
+}
+
+func (b BaseGraphBuilder) BuildEdges(graph types.IRGraph) {
 	for idx := range len(graph.CmdList()) - 1 {
 		nowID := graph.CmdList()[idx].ID()
 		nextID := graph.CmdList()[idx+1].ID()
-		BaseEdge{}.Add(graph, nowID, nextID, []string{"context"})
+		e := types.BashEdge{}
+		e.Add(graph, nowID, nextID, []string{"context"})
 	}
+
 }

@@ -3,6 +3,8 @@ package test
 import (
 	"bytes"
 	analysis2 "dockgen/pkg/analysis"
+	analysis "dockgen/pkg/analysis/graph"
+	"dockgen/pkg/analysis/types"
 	"dockgen/pkg/command"
 	"dockgen/pkg/log"
 	"dockgen/pkg/util"
@@ -73,14 +75,17 @@ func TestNewAnalyzer(t *testing.T) {
 
 	tokens, _ := analyzer.Analyze()
 
-	//graph := analysis.NewIRGraph(tokens)
-	//_ = graph.Build([]analysis.GraphBuilder{analysis.NewFamilyGraphBuilder()})
-	//_ = graph.Init()
-	//
-	//data := graph.GetTagGroup(1, "family")
+	g := types.NewBashGraph(tokens)
+	g.InitGraph([]types.GraphBuilder{&analysis.BaseGraphBuilder{}, &analysis.FamilyGraphBuilder{}})
+	data := g.GetTagGroup(4, "family", nil)
 
-	for _, token := range tokens {
-		log.Infof("%s", util.JSONf(token.ToMap()))
-
+	for _, d := range data {
+		log.Infof("%s", util.JSONf(d.Cmd()))
 	}
+
+	//
+	//for _, token := range tokens {
+	//	log.Infof("%s", util.JSONf(token.Program()))
+	//
+	//}
 }
