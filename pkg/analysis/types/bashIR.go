@@ -2,7 +2,6 @@ package types
 
 import (
 	parser "dockgen/pkg/analysis/types/antlr4"
-	"dockgen/pkg/util"
 	"fmt"
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -17,22 +16,6 @@ type AntlrCommandIR struct {
 	redirect    *string
 	env         *Env
 }
-
-func (ir AntlrCommandIR) ToMap() map[string]interface{} {
-	data := map[string]interface{}{
-		"program":     ir.program,
-		"pipeCommand": ir.pipeCommand,
-		"options":     ir.options,
-		"args":        ir.args,
-		"input":       ir.input,
-		"output":      ir.output,
-		"redirect":    ir.redirect,
-		"env":         ir.env,
-	}
-
-	return data
-}
-
 type BashCommandIR struct {
 	*AntlrCommandIR
 	id     int
@@ -81,7 +64,11 @@ func (ir BashCommandIR) Program() string {
 }
 
 func (ir BashCommandIR) PipeCommand() []IR {
-	pipe, _ := util.CastSlice[*AntlrCommandIR, IR](ir.pipeCommand)
+	var pipe []IR
+	for _, p := range ir.pipeCommand {
+		ir := &BashCommandIR{AntlrCommandIR: p}
+		pipe = append(pipe, ir)
+	}
 	return pipe
 }
 
