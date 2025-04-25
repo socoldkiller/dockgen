@@ -15,3 +15,10 @@ func CastSlice[Input any, Output any](input []Input) ([]Output, error) {
 	}
 	return result, nil
 }
+
+func StrOrNil(val string) *string {
+	if val == "" {
+		return nil
+	}
+	return &val
+}

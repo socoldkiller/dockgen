@@ -2,6 +2,7 @@ package types
 
 import (
 	parser "dockgen/pkg/analysis/types/antlr4"
+	"dockgen/pkg/util"
 	"github.com/antlr4-go/antlr/v4"
 )
 
@@ -76,19 +77,19 @@ func (v *IRVisitor) VisitCommand(ctx *parser.CommandContext) interface{} {
 		last := ctx.AllRedir()[len(ctx.AllRedir())-1]
 		var text string
 		text = last.WORD().GetText()
-		if last.LT() != nil {
+
+		switch {
+		case last.LT() != nil:
 			ioPut["input"] = &text
 			redirect = last.LT().GetText()
-		}
 
-		if last.GT() != nil || last.DGT() != nil {
-			ioPut["output"] = &text
-			redirect = last.GT().GetText()
-		}
-
-		if last.DGT() != nil {
+		case last.DGT() != nil:
 			ioPut["output"] = &text
 			redirect = last.DGT().GetText()
+
+		case last.GT() != nil:
+			ioPut["output"] = &text
+			redirect = last.GT().GetText()
 		}
 	}
 
@@ -99,7 +100,7 @@ func (v *IRVisitor) VisitCommand(ctx *parser.CommandContext) interface{} {
 		env:      nil,
 		input:    ioPut["input"],
 		output:   ioPut["output"],
-		redirect: &redirect,
+		redirect: util.StrOrNil(redirect),
 	}
 	if assign == nil || assign.GetChildCount() != 3 {
 		return ir
