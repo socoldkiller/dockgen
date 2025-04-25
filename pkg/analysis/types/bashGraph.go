@@ -29,16 +29,16 @@ func (b *BashGraph) InitGraph(builders []GraphBuilder) {
 
 }
 
-func (b *BashGraph) Nodes() map[int]IR {
-	return b.nodes
+func (g *BashGraph) Nodes() map[int]IR {
+	return g.nodes
 }
 
-func (b *BashGraph) Edges() map[int][]Edge {
-	return b.edges
+func (g *BashGraph) Edges() map[int][]Edge {
+	return g.edges
 }
 
-func (b *BashGraph) CmdList() []IR {
-	return b.irs
+func (g *BashGraph) CmdList() []IR {
+	return g.irs
 }
 
 func (g *BashGraph) GetTagGroup(from int, tag string, groups []IR) []IR {
