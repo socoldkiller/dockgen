@@ -88,5 +88,4 @@ It supports input from JSON files or directly from standard input.`,
 
 func init() {
 	rootCmd.AddCommand(irCmd)
-
 }
