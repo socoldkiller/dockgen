@@ -13,8 +13,8 @@ optionWithArg
     ;
 
 command
-    : prog assign
-    | redir* prog optionWithArg* arg* redir* (logicalOp command)?
+    : prog? assign
+    | redir* prog (optionWithArg | arg)* redir* (logicalOp command)?
     ;
 
 prog

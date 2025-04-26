@@ -55,7 +55,7 @@ func (v *IRVisitor) VisitPipeline(ctx *parser.PipelineContext) interface{} {
 func (v *IRVisitor) VisitCommand(ctx *parser.CommandContext) interface{} {
 	var (
 		env        Env
-		Program    = ctx.Prog().GetText()
+		Program    = DefaultParseValue(ctx.Prog())
 		options    = ctx.AllOptionWithArg()
 		assign     = ctx.Assign()
 		cmdOptions = make(map[string]string)
