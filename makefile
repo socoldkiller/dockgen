@@ -22,7 +22,7 @@ all: antlr build
 
 
 antlr:
-	cd $(PWD)/pkg/analysis/ir/antlr4 && \
+	cd $(PWD)/pkg/analysis/types/antlr4 && \
 	antlr -Dlanguage=Go -visitor Bash.g4
 
 
