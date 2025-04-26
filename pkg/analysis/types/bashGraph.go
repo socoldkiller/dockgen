@@ -41,7 +41,17 @@ func (g *BashGraph) CmdList() []IR {
 	return g.irs
 }
 
-func (g *BashGraph) GetTagGroup(from int, tag string, groups []IR) []IR {
+func (g *BashGraph) GetCmdGroup(program string, tag string) []IR {
+	nodes := g.CmdList()
+	var groups []IR
+	idx := slices.IndexFunc(nodes, func(ir IR) bool { return ir.Program() == program })
+	if idx == -1 {
+		return nil
+	}
+	return g.getTagGroup(nodes[idx].ID(), tag, groups)
+}
+
+func (g *BashGraph) getTagGroup(from int, tag string, groups []IR) []IR {
 	nowNode := g.Nodes()[from]
 	if nowNode != nil {
 		groups = append(groups, nowNode)
@@ -50,7 +60,7 @@ func (g *BashGraph) GetTagGroup(from int, tag string, groups []IR) []IR {
 	for _, edge := range g.edges[from] {
 		nextID, _ := edge.To()
 		if slices.Contains(edge.Tags(), tag) {
-			groups = g.GetTagGroup(nextID, tag, groups)
+			groups = g.getTagGroup(nextID, tag, groups)
 		}
 	}
 
