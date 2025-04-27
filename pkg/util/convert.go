@@ -1,19 +1,14 @@
 package util
 
 import (
-	"fmt"
+	"github.com/samber/lo"
 )
 
 func CastSlice[Input any, Output any](input []Input) ([]Output, error) {
-	var result []Output
-	for _, item := range input {
-		casted, ok := any(item).(Output)
-		if !ok {
-			return nil, fmt.Errorf("cast failed for item: %+v", item)
-		}
-		result = append(result, casted)
-	}
-	return result, nil
+	return lo.Map(input, func(item Input, index int) Output {
+		return any(item).(Output)
+	}), nil
+
 }
 
 func StrOrNil(val string) *string {
