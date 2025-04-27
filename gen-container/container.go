@@ -2,6 +2,7 @@ package gen_container
 
 import (
 	"context"
+	"dockgen/pkg/dockCopy"
 	"dockgen/pkg/log"
 	"fmt"
 	"github.com/docker/docker/api/types"
@@ -12,6 +13,7 @@ import (
 	"github.com/docker/docker/pkg/archive"
 	"github.com/moby/term"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
+	"io"
 	"net"
 	"os"
 	"os/signal"
@@ -69,7 +71,7 @@ func NewContainer(c *client.Client, option CreateBuildAndContainerOptions) (*Con
 		return nil, err
 	}
 
-	CreateContainer, err := CreateBuildAndContainer(c,
+	CreateContainer, err := createBuildAndContainer(c,
 		types.ImageBuildOptions{
 			Tags:       []string{option.Tag},
 			Dockerfile: option.DockerFile,
@@ -136,6 +138,10 @@ func NewContainer(c *client.Client, option CreateBuildAndContainerOptions) (*Con
 	}, nil
 
 }
+func (co *Container) StartIO(stdin io.Reader, stdout io.Writer) {
+	go dockCopy.Copy(co.AttachContainer.Conn, stdin)
+	dockCopy.Copy(stdout, co.AttachContainer.Reader)
+}
 
 func (co *Container) CloseAttachContainer() {
 	co.AttachContainer.Close()
@@ -169,7 +175,7 @@ func (co *Container) Closed() error {
 	return <-co.closed
 }
 
-func CreateBuildAndContainer(c *client.Client,
+func createBuildAndContainer(c *client.Client,
 	imageBuildOpt types.ImageBuildOptions,
 	config *container.Config,
 	hostConfig *container.HostConfig,

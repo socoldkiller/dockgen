@@ -10,6 +10,7 @@ import (
 )
 
 type PlayBack interface {
+	BeforePlayBack(cmdList []string)
 	PlayBack(cmdList []string) ([]*command.Result, error)
 }
 
@@ -17,6 +18,10 @@ type Runner struct {
 	Rules    []rule.Rule
 	Matcher  matcher.RuleMatcher
 	Executor command.Executor
+}
+
+func (p Runner) BeforePlayBack(cmdList []string) {
+	//TODO
 }
 
 type Options struct {
