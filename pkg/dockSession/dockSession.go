@@ -18,15 +18,27 @@ type Session struct {
 	dockerfile  string
 	client      *client.Client
 	volume      volume.Volume
+
+	playbackCmd []string
 }
 
-func NewSession(historyPath, imageTag, dockerfile string, cli *client.Client) *Session {
+type SessionOptions struct {
+	HistoryPath string
+	ImageTag    string
+	Dockerfile  string
+}
+
+func NewSession(cli *client.Client, opt SessionOptions) *Session {
 	return &Session{
-		historyPath: historyPath,
-		imageTag:    imageTag,
-		dockerfile:  dockerfile,
+		historyPath: opt.HistoryPath,
+		imageTag:    opt.ImageTag,
+		dockerfile:  opt.Dockerfile,
 		client:      cli,
+		playbackCmd: nil,
 	}
+}
+func (ds *Session) AddCmd(cmd []string) {
+	ds.playbackCmd = append(ds.playbackCmd, cmd...)
 }
 
 func (ds *Session) createContainer(tty bool, raw bool) (*genContainer.Container, error) {
@@ -35,7 +47,7 @@ func (ds *Session) createContainer(tty bool, raw bool) (*genContainer.Container,
 		Cmd:        "/bin/sh",
 		Tty:        tty,
 		Mounts:     map[string]string{ds.historyPath: "/root/.bash_history"},
-		Env:        []string{"HISTFILE=/root/.bash_history", "HISTSIZE=10000", "HISTFILESIZE=20000"},
+		Env:        nil,
 		DockerFile: ds.dockerfile,
 		Raw:        raw,
 	})
@@ -70,7 +82,7 @@ func (ds *Session) Run() ([]*command.Result, error) {
 		return nil, err
 	}
 
-	r := runner.NewDockRunner(rec, pb)
+	r := runner.NewDockRunner(rec, pb, ds.playbackCmd)
 
 	return r.Run()
 }

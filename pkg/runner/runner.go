@@ -9,10 +9,16 @@ import (
 type DockRunner struct {
 	recorder recorder.Recorder
 	playback playback.PlayBack
+
+	infoCmd []string
 }
 
-func NewDockRunner(recorder recorder.Recorder, playback playback.PlayBack) *DockRunner {
-	return &DockRunner{recorder: recorder, playback: playback}
+func NewDockRunner(recorder recorder.Recorder, playback playback.PlayBack, infoCmd []string) *DockRunner {
+	return &DockRunner{
+		recorder: recorder,
+		playback: playback,
+		infoCmd:  infoCmd,
+	}
 }
 
 func (r DockRunner) Run() ([]*command.Result, error) {
@@ -25,5 +31,6 @@ func (r DockRunner) Run() ([]*command.Result, error) {
 		return nil, err
 	}
 
+	cmdList = append(cmdList, r.infoCmd...)
 	return r.playback.PlayBack(cmdList)
 }

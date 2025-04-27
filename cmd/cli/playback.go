@@ -30,7 +30,14 @@ var playbackCmd = &cobra.Command{
 	Long:  longUsage,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(longUsage)
-		session := dockSession.NewSession("bash_history", "debugger:0.2", "./Dockerfile", genContainer.Client())
+		opt := dockSession.SessionOptions{
+			HistoryPath: "bash_history",
+			ImageTag:    "debugger:alpha",
+			Dockerfile:  "./Dockerfile",
+		}
+		cli := genContainer.Client()
+		session := dockSession.NewSession(cli, opt)
+		session.AddCmd([]string{"env"})
 		result, err := session.Run()
 		if err != nil {
 			log.Fatalf("create dock session error: %v", err)

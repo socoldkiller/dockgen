@@ -6,11 +6,21 @@ import (
 )
 
 type Recorder interface {
+	BeforeRecord(cmd []string)
 	Record() ([]string, error)
+	AfterRecord(cmd []string)
 }
 
 type HistoryFileRecorder struct {
 	path string
+}
+
+func (h HistoryFileRecorder) BeforeRecord([]string) {
+	return
+}
+
+func (h HistoryFileRecorder) AfterRecord([]string) {
+	return
 }
 
 func NewHistoryFileRecorder(path string) *HistoryFileRecorder {
