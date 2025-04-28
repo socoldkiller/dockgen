@@ -4,6 +4,7 @@ import (
 	parser "dockgen/pkg/analysis/types/antlr4"
 	"dockgen/pkg/util"
 	"github.com/antlr4-go/antlr/v4"
+	"github.com/samber/lo"
 )
 
 func DefaultParseValue(val antlr.ParseTree) string {
@@ -74,7 +75,8 @@ func (v *IRVisitor) VisitCommand(ctx *parser.CommandContext) interface{} {
 	var redirect string
 	ioPut := make(map[string]*string)
 	if len(ctx.AllRedir()) != 0 {
-		last := ctx.AllRedir()[len(ctx.AllRedir())-1]
+		last, _ := lo.Last(ctx.AllRedir())
+
 		var text string
 		text = last.WORD().GetText()
 
