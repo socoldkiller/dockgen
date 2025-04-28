@@ -5,7 +5,6 @@ package cli
 
 import (
 	genContainer "dockgen/gen-container"
-	"dockgen/pkg/dockCopy"
 	"dockgen/pkg/log"
 	"dockgen/pkg/recorder"
 	"dockgen/pkg/util"
@@ -47,11 +46,10 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatalf("create container error:%v", err)
 		}
-
-		go dockCopy.Copy(co.AttachContainer.Conn, os.Stdin)
-		dockCopy.Copy(os.Stdout, co.AttachContainer.Reader)
-		co.Close()
 		c := recorder.NewContainer(co, historyPath)
+		//c.BeforeRecord([]string{"export HISTFILE=/root/.bash_history", "export HISTSIZE=10000", "export HISTFILESIZE=20000"})
+		co.StartIO(os.Stdin, os.Stdout)
+		co.Close()
 		cmdList, err := c.Record()
 		if err != nil {
 			log.Fatalf("record cntainer cmd error: %v", err)
