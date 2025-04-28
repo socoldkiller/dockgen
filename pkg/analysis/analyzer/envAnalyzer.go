@@ -1,17 +1,13 @@
-package analysis
+package analyzer
 
 import (
+	"dockgen/pkg/analysis"
 	"dockgen/pkg/analysis/types"
 	"dockgen/pkg/command"
 	"fmt"
 	"github.com/samber/lo"
 	"strings"
 )
-
-type Analyzer interface {
-	Analyze(graph types.IRGraph) error
-	Reset()
-}
 
 type EnvAnalyzer struct {
 	userTable   map[string]string
@@ -45,7 +41,7 @@ func analyzeSystemEnv(graph types.IRGraph) (map[string]string, error) {
 			Cmd: line,
 		}
 	})
-	envBuilder := NewBashIRBuilder()
+	envBuilder := analysis.NewBashIRBuilder()
 	envList, err := envBuilder.Build(res)
 
 	if err != nil {
