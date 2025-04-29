@@ -5,6 +5,11 @@ import (
 )
 
 type Analyzer interface {
-	Analyze(graph types.CFGraph) error
+	Analyze(graph types.CFGraph) (*Result, error)
 	Reset()
+}
+
+type Result struct {
+	Name string
+	IR   []types.IR
 }

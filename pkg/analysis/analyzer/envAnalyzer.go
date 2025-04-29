@@ -10,9 +10,7 @@ import (
 )
 
 type EnvAnalyzer struct {
-	userTable   map[string]string
-	systemTable map[string]string
-	f           *FamilyAnalyzer
+	f *FamilyAnalyzer
 }
 
 func NewEnvAnalyzer(f *FamilyAnalyzer) *EnvAnalyzer {
@@ -20,9 +18,7 @@ func NewEnvAnalyzer(f *FamilyAnalyzer) *EnvAnalyzer {
 		f = &FamilyAnalyzer{}
 	}
 	return &EnvAnalyzer{
-		userTable:   make(map[string]string),
-		systemTable: make(map[string]string),
-		f:           f,
+		f: f,
 	}
 }
 
@@ -31,7 +27,7 @@ func analyzeSystemEnv(f *FamilyAnalyzer) (map[string]string, error) {
 
 	envNode, ok := lo.Last(systemNodes)
 	if !ok {
-		return nil, fmt.Errorf("not found system command")
+		return nil, fmt.Errorf("not found env command, we must need env command to analyze system env")
 	}
 	stdout := envNode.Stdout()
 	lines := strings.Split(stdout, "\n")
@@ -56,18 +52,18 @@ func analyzeSystemEnv(f *FamilyAnalyzer) (map[string]string, error) {
 	return systemEnv, nil
 }
 
-func (e *EnvAnalyzer) Analyze(graph types.CFGraph) error {
+func (e *EnvAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
 	if err := e.f.Analyze(graph); err != nil {
-		return err
+		return nil, err
 	}
-
 	systemEnv, err := analyzeSystemEnv(e.f)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	e.systemTable = systemEnv
 
 	exportNodes := e.f.GetFamilyCmd("export")
+	builder := analysis.NewBashIRBuilder()
+	var exportCmdList []string
 	for _, node := range exportNodes {
 		env := node.Env()
 		var value string
@@ -80,23 +76,33 @@ func (e *EnvAnalyzer) Analyze(graph types.CFGraph) error {
 				env.EnvValue.Name = env.EnvValue.Name[1:]
 			}
 
-			value = e.systemTable[env.EnvValue.Name]
+			value = systemEnv[env.EnvValue.Name]
 
 		default:
 			value = env.EnvValue.Value
 
 		}
-		e.userTable[env.EnvVariable] = value
+		exportCmd := fmt.Sprintf("export %s=%s", env.EnvVariable, value)
+		exportCmdList = append(exportCmdList, exportCmd)
 	}
-	return nil
+
+	cmdResults := lo.Map(exportCmdList, func(cmd string, _ int) *command.Result {
+		return &command.Result{
+			Cmd: cmd,
+		}
+	})
+
+	bashIRs, err := builder.Build(cmdResults)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Result{
+		Name: "EnvAnalyzer",
+		IR:   bashIRs,
+	}, nil
 }
 
 func (e *EnvAnalyzer) Reset() {
-	e.userTable = make(map[string]string)
-	e.systemTable = make(map[string]string)
 	e.f = &FamilyAnalyzer{}
-}
-
-func (e *EnvAnalyzer) GetEnv() map[string]string {
-	return e.userTable
 }
