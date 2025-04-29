@@ -15,11 +15,14 @@ type EnvAnalyzer struct {
 	f           *FamilyAnalyzer
 }
 
-func NewEnvAnalyzer() *EnvAnalyzer {
+func NewEnvAnalyzer(f *FamilyAnalyzer) *EnvAnalyzer {
+	if f == nil {
+		f = &FamilyAnalyzer{}
+	}
 	return &EnvAnalyzer{
 		userTable:   make(map[string]string),
 		systemTable: make(map[string]string),
-		f:           &FamilyAnalyzer{},
+		f:           f,
 	}
 }
 
