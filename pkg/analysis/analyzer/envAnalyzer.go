@@ -98,8 +98,9 @@ func (e *EnvAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
 	}
 
 	return &Result{
-		Name: "EnvAnalyzer",
-		IR:   bashIRs,
+		Name:  "EnvAnalyzer",
+		OldIR: exportNodes,
+		NewIR: bashIRs,
 	}, nil
 }
 

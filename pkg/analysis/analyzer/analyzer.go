@@ -10,6 +10,11 @@ type Analyzer interface {
 }
 
 type Result struct {
-	Name string
-	IR   []types.IR
+	Name  string
+	OldIR []types.IR
+	NewIR []types.IR
+}
+
+func GetResultIR(res *Result, idx int) (types.IR, types.IR) {
+	return res.OldIR[idx], res.NewIR[idx]
 }
