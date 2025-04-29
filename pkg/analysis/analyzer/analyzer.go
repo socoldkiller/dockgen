@@ -5,6 +5,6 @@ import (
 )
 
 type Analyzer interface {
-	Analyze(graph types.IRGraph) error
+	Analyze(graph types.CFGraph) error
 	Reset()
 }

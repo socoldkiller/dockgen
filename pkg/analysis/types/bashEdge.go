@@ -5,7 +5,7 @@ type BashEdge struct {
 	to     int
 	tags   []string
 	weight int
-	g      IRGraph
+	g      CFGraph
 }
 
 func (e *BashEdge) SetTags(tags []string) {
@@ -24,7 +24,7 @@ func (e *BashEdge) Tags() []string {
 	return e.tags
 }
 
-func (e *BashEdge) Add(g IRGraph, from, to int, tag []string) {
+func (e *BashEdge) Add(g CFGraph, from, to int, tag []string) {
 	for _, edge := range g.Edges()[from] {
 		toID, _ := edge.To()
 		if toID == to {

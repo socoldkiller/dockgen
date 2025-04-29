@@ -1,18 +1,18 @@
 package types
 
-type GraphBuilder interface {
-	BuildEdges(graph IRGraph)
+type CFGraphBuilder interface {
+	BuildEdges(graph CFGraph)
 }
 
-type IRGraph interface {
-	InitGraph([]GraphBuilder)
+type CFGraph interface {
+	InitGraph([]CFGraphBuilder)
 	Nodes() map[int]IR
-	Edges() map[int][]Edge
+	Edges() map[int][]CFGEdge
 	CmdList() []IR
 }
 
-type Edge interface {
-	Add(g IRGraph, from, to int, tag []string)
+type CFGEdge interface {
+	Add(g CFGraph, from, to int, tag []string)
 	To() (int, IR)
 	From() (int, IR)
 	Tags() []string

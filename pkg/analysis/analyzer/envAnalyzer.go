@@ -12,27 +12,24 @@ import (
 type EnvAnalyzer struct {
 	userTable   map[string]string
 	systemTable map[string]string
+	f           *FamilyAnalyzer
 }
 
 func NewEnvAnalyzer() *EnvAnalyzer {
 	return &EnvAnalyzer{
-		userTable: make(map[string]string),
+		userTable:   make(map[string]string),
+		systemTable: make(map[string]string),
+		f:           &FamilyAnalyzer{},
 	}
 }
 
-func analyzeSystemEnv(graph types.IRGraph) (map[string]string, error) {
-	g, ok := graph.(*types.BashGraph)
-	if !ok {
-		return nil, fmt.Errorf("invalid graph type")
-	}
-	systemNodes := g.GetCmdGroup("env", "family")
+func analyzeSystemEnv(f *FamilyAnalyzer) (map[string]string, error) {
+	systemNodes := f.GetFamilyCmd("env")
 
-	var envNode types.IR
-	if len(systemNodes) == 0 {
+	envNode, ok := lo.Last(systemNodes)
+	if !ok {
 		return nil, fmt.Errorf("not found system command")
 	}
-
-	envNode = systemNodes[len(systemNodes)-1]
 	stdout := envNode.Stdout()
 	lines := strings.Split(stdout, "\n")
 
@@ -56,15 +53,18 @@ func analyzeSystemEnv(graph types.IRGraph) (map[string]string, error) {
 	return systemEnv, nil
 }
 
-func (e *EnvAnalyzer) Analyze(graph types.IRGraph) error {
-	systemEnv, err := analyzeSystemEnv(graph)
+func (e *EnvAnalyzer) Analyze(graph types.CFGraph) error {
+	if err := e.f.Analyze(graph); err != nil {
+		return err
+	}
+
+	systemEnv, err := analyzeSystemEnv(e.f)
 	if err != nil {
 		return err
 	}
 	e.systemTable = systemEnv
-	g := graph.(*types.BashGraph)
 
-	exportNodes := g.GetCmdGroup("export", "family")
+	exportNodes := e.f.GetFamilyCmd("export")
 	for _, node := range exportNodes {
 		env := node.Env()
 		var value string
@@ -90,6 +90,8 @@ func (e *EnvAnalyzer) Analyze(graph types.IRGraph) error {
 
 func (e *EnvAnalyzer) Reset() {
 	e.userTable = make(map[string]string)
+	e.systemTable = make(map[string]string)
+	e.f = &FamilyAnalyzer{}
 }
 
 func (e *EnvAnalyzer) GetEnv() map[string]string {
