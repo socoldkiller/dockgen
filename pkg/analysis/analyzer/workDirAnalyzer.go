@@ -4,9 +4,11 @@ import (
 	"dockgen/pkg/analysis"
 	"dockgen/pkg/analysis/types"
 	"dockgen/pkg/command"
+	"dockgen/pkg/log"
 	"fmt"
 	"github.com/samber/lo"
 	"path/filepath"
+	"strings"
 )
 
 type WorkDirAnalyzer struct {
@@ -14,16 +16,20 @@ type WorkDirAnalyzer struct {
 	cwd string
 }
 
+func (w *WorkDirAnalyzer) Init(az ...Analyzer) {
+	if len(az) == 0 {
+		w.f = new(FamilyAnalyzer)
+		return
+	}
+	w.f = az[0].(*FamilyAnalyzer)
+}
+
 func (w *WorkDirAnalyzer) Reset() {
 	return
 }
 
-func NewWorkDirAnalyzer(f *FamilyAnalyzer, initialCwd string) *WorkDirAnalyzer {
-	if f == nil {
-		f = &FamilyAnalyzer{}
-	}
+func NewWorkDirAnalyzer(initialCwd string) *WorkDirAnalyzer {
 	return &WorkDirAnalyzer{
-		f:   f,
 		cwd: initialCwd,
 	}
 }
@@ -35,17 +41,33 @@ func resolvePath(base, target string) string {
 	return filepath.Clean(filepath.Join(base, target))
 }
 
+func isValidCD(node types.IR) bool {
+	stderr := node.Stderr()
+	if stderr == "" {
+		return true
+	}
+	if strings.Contains(stderr, "No such file or directory") ||
+		strings.Contains(stderr, "cd:") {
+		return false
+	}
+	return true
+}
+
 func (w *WorkDirAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
 	f := w.f
-	if err := f.Analyze(graph); err != nil {
+	if _, err := f.Analyze(graph); err != nil {
 		return nil, err
 	}
 
 	cdNodes := f.GetFamilyCmd("cd")
-
 	var cmdList []string
 
 	for _, node := range cdNodes {
+		if !isValidCD(node) {
+			log.Debugf("invalid cd: %s", node.Stderr())
+			continue
+		}
+
 		if len(node.Args()) > 0 {
 			target := node.Args()[0]
 			w.cwd = resolvePath(w.cwd, target)

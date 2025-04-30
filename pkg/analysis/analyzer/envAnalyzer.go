@@ -14,6 +14,14 @@ type EnvAnalyzer struct {
 	systemNodes []types.IR
 }
 
+func (e *EnvAnalyzer) Init(az ...Analyzer) {
+	if len(az) == 0 {
+		e.f = new(FamilyAnalyzer)
+		return
+	}
+	e.f = az[0].(*FamilyAnalyzer)
+}
+
 func ParseEnvCmdIR(envNode types.IR) []types.IR {
 	if envNode.Cmd() != "env" {
 		return nil
@@ -43,14 +51,14 @@ func analyzeSystemEnv(a *EnvAnalyzer) (map[string]string, error) {
 }
 
 func NewEnvAnalyzer(systemNodes []types.IR) *EnvAnalyzer {
-	return &EnvAnalyzer{
-		f:           new(FamilyAnalyzer),
+	envAnalyzer := &EnvAnalyzer{
 		systemNodes: systemNodes,
 	}
+	return envAnalyzer
 }
 
 func (e *EnvAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
-	err := e.f.Analyze(graph)
+	_, err := e.f.Analyze(graph)
 	if err != nil {
 		return nil, err
 	}

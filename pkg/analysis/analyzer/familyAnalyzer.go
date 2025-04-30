@@ -6,13 +6,19 @@ type FamilyAnalyzer struct {
 	familyNodes map[string][]types.IR
 }
 
-func (f *FamilyAnalyzer) Analyze(graph types.CFGraph) error {
+func (f *FamilyAnalyzer) Init(...Analyzer) {
+	return
+}
+
+func (f *FamilyAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
 	familyNodes := make(map[string][]types.IR)
 	for _, cmd := range graph.CmdList() {
 		familyNodes[cmd.Program()] = append(familyNodes[cmd.Program()], cmd)
 	}
 	f.familyNodes = familyNodes
-	return nil
+	return &Result{
+		Name: "FamilyAnalyzer",
+	}, nil
 }
 
 func (f *FamilyAnalyzer) Reset() {
