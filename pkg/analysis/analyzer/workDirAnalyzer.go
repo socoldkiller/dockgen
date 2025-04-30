@@ -14,6 +14,10 @@ type WorkDirAnalyzer struct {
 	cwd string
 }
 
+func (w *WorkDirAnalyzer) Reset() {
+	return
+}
+
 func NewWorkDirAnalyzer(f *FamilyAnalyzer, initialCwd string) *WorkDirAnalyzer {
 	if f == nil {
 		f = &FamilyAnalyzer{}
