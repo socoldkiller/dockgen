@@ -4,7 +4,6 @@ import (
 	"dockgen/pkg/analysis"
 	"dockgen/pkg/analysis/types"
 	"dockgen/pkg/command"
-	"dockgen/pkg/log"
 	"fmt"
 	"github.com/samber/lo"
 	"path/filepath"
@@ -60,14 +59,14 @@ func (w *WorkDirAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
 	}
 
 	cdNodes := f.GetFamilyCmd("cd")
+
+	cdNodes = lo.Filter(cdNodes, func(cdIR types.IR, _ int) bool {
+		return isValidCD(cdIR)
+	})
+
 	var cmdList []string
 
 	for _, node := range cdNodes {
-		if !isValidCD(node) {
-			log.Debugf("invalid cd: %s", node.Stderr())
-			continue
-		}
-
 		if len(node.Args()) > 0 {
 			target := node.Args()[0]
 			w.cwd = resolvePath(w.cwd, target)
