@@ -119,6 +119,10 @@ func (v *IRVisitor) VisitCommand(ctx *parser.CommandContext) interface{} {
 	default:
 	}
 
+	if value.Value == "<EOF>" {
+		value.Value = ""
+	}
+
 	env.EnvValue = value
 	ir.env = &env
 	return ir

@@ -45,7 +45,7 @@ logicalOp
     ;
 
 assign
-    : WORD ASSIGN (WORD | variable)
+    : WORD ASSIGN (WORD | variable | EOF)
     ;
 
 
