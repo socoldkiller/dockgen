@@ -10,28 +10,17 @@ import (
 )
 
 type EnvAnalyzer struct {
-	f *FamilyAnalyzer
+	f           *FamilyAnalyzer
+	systemNodes []types.IR
 }
 
-func NewEnvAnalyzer(f *FamilyAnalyzer) *EnvAnalyzer {
-	if f == nil {
-		f = &FamilyAnalyzer{}
+func ParseEnvCmdIR(envNode types.IR) []types.IR {
+	if envNode.Cmd() != "env" {
+		return nil
 	}
-	return &EnvAnalyzer{
-		f: f,
-	}
-}
 
-func analyzeSystemEnv(f *FamilyAnalyzer) (map[string]string, error) {
-	systemNodes := f.GetFamilyCmd("env")
-
-	envNode, ok := lo.Last(systemNodes)
-	if !ok {
-		return nil, fmt.Errorf("not found env command, we must need env command to analyze system env")
-	}
 	stdout := envNode.Stdout()
 	lines := strings.Split(stdout, "\n")
-
 	res := lo.Map(lines, func(line string, index int) *command.Result {
 		return &command.Result{
 			Cmd: line,
@@ -39,24 +28,34 @@ func analyzeSystemEnv(f *FamilyAnalyzer) (map[string]string, error) {
 	})
 	envBuilder := analysis.NewBashIRBuilder()
 	envList, err := envBuilder.Build(res)
+	if err != nil {
+		return nil
+	}
+	return envList
+}
 
+func analyzeSystemEnv(a *EnvAnalyzer) (map[string]string, error) {
+	systemEnv := make(map[string]string)
+	for _, env := range a.systemNodes {
+		systemEnv[env.Env().EnvVariable] = env.Env().EnvValue.Value
+	}
+	return systemEnv, nil
+}
+
+func NewEnvAnalyzer(systemNodes []types.IR) *EnvAnalyzer {
+	return &EnvAnalyzer{
+		f:           new(FamilyAnalyzer),
+		systemNodes: systemNodes,
+	}
+}
+
+func (e *EnvAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
+	err := e.f.Analyze(graph)
 	if err != nil {
 		return nil, err
 	}
 
-	systemEnv := make(map[string]string)
-	for _, env := range envList {
-		systemEnv[env.Env().EnvVariable] = env.Env().EnvValue.Value
-	}
-
-	return systemEnv, nil
-}
-
-func (e *EnvAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
-	if err := e.f.Analyze(graph); err != nil {
-		return nil, err
-	}
-	systemEnv, err := analyzeSystemEnv(e.f)
+	systemEnv, err := analyzeSystemEnv(e)
 	if err != nil {
 		return nil, err
 	}
