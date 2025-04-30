@@ -61,7 +61,7 @@ OROR: '||';
 SEMI: ';';
 
 fragment DASH: '-';
-OPTION: DASH+ ~[ \t\r\n|<>;&=()$`'"\\-]+;
+OPTION: DASH+ ~[ \t\r\n|<>;&=()$`'"\\]+;
 
 WORD: ~[ \t\r\n|<>;&=()$`\\]+;
 
