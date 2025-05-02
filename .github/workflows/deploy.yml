@@ -1,0 +1,24 @@
+name: Go
+
+on:
+  push:
+    branches: [ "dev","Ci" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: golang:1.24-alpine
+
+    steps:
+      - name: Install build dependencies
+        run: |
+          apk add --no-cache make upx
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Build release
+        run: make release
