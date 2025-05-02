@@ -39,6 +39,11 @@ build:
 	@mkdir -p $(BUILD_DIR)
 	$(GO) build -o $(BIN) .
 
+release:
+	@mkdir -p $(BUILD_DIR)
+	$(GO) build -ldflags '-w -s' -gcflags '-l' -o $(BIN) .
+
+
 run:
 	$(GO) build
 
