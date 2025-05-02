@@ -63,7 +63,7 @@ SEMI: ';';
 fragment DASH: '-';
 OPTION: DASH+ ~[ \t\r\n|<>;&=()$`'"\\]+;
 
-WORD: ~[ \t\r\n|<>;&=()`\\]+;
+WORD: ~[ \t\r\n|<>;&=()$`\\]+;
 
 // ------------ Whitespace ------------
 
