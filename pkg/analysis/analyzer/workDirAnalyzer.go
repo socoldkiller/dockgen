@@ -52,7 +52,7 @@ func isValidCD(node types.IR) bool {
 	return true
 }
 
-func (w *WorkDirAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
+func (w *WorkDirAnalyzer) Analyze(graph types.CFGraph) (ResultReader, error) {
 	f := w.f
 	if _, err := f.Analyze(graph); err != nil {
 		return nil, err
@@ -86,10 +86,5 @@ func (w *WorkDirAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return &Result{
-		Name:  "WorkDirAnalyzer",
-		OldIR: cdNodes,
-		NewIR: cdIRs,
-	}, nil
+	return NewResult("WorkDirAnalyzer", cdNodes, cdIRs), nil
 }

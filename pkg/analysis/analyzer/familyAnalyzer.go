@@ -10,15 +10,14 @@ func (f *FamilyAnalyzer) Init(...Analyzer) {
 	return
 }
 
-func (f *FamilyAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
+func (f *FamilyAnalyzer) Analyze(graph types.CFGraph) (ResultReader, error) {
 	familyNodes := make(map[string][]types.IR)
 	for _, cmd := range graph.CmdList() {
 		familyNodes[cmd.Program()] = append(familyNodes[cmd.Program()], cmd)
 	}
 	f.familyNodes = familyNodes
-	return &Result{
-		Name: "FamilyAnalyzer",
-	}, nil
+
+	return NewResult("FamilyAnalyzer", nil, nil), nil
 }
 
 func (f *FamilyAnalyzer) Reset() {

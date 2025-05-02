@@ -57,7 +57,7 @@ func NewEnvAnalyzer(systemNodes []types.IR) *EnvAnalyzer {
 	return envAnalyzer
 }
 
-func (e *EnvAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
+func (e *EnvAnalyzer) Analyze(graph types.CFGraph) (ResultReader, error) {
 	_, err := e.f.Analyze(graph)
 	if err != nil {
 		return nil, err
@@ -104,11 +104,7 @@ func (e *EnvAnalyzer) Analyze(graph types.CFGraph) (*Result, error) {
 		return nil, err
 	}
 
-	return &Result{
-		Name:  "EnvAnalyzer",
-		OldIR: exportNodes,
-		NewIR: bashIRs,
-	}, nil
+	return NewResult("EnvAnalyzer", exportNodes, bashIRs), nil
 }
 
 func (e *EnvAnalyzer) Reset() {
