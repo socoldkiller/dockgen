@@ -14,6 +14,7 @@ BIN := $(BUILD_DIR)/$(APP_NAME)
 DEBUG_CONTAINER = debug-container
 
 GO := go
+UPX:= upx
 
 CONTAINER_NAME = dockgen-container
 .PHONY: all antlr build clean run
@@ -42,6 +43,7 @@ build:
 release:
 	@mkdir -p $(BUILD_DIR)
 	$(GO) build -ldflags '-w -s' -gcflags '-l' -o $(BIN) .
+	$(UPX) -9 $(BIN)
 
 
 run:
