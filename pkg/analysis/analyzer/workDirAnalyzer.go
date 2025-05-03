@@ -11,8 +11,9 @@ import (
 )
 
 type WorkDirAnalyzer struct {
-	f   *FamilyAnalyzer
-	cwd string
+	f       *FamilyAnalyzer
+	cwd     string
+	prevCwd string
 }
 
 func (w *WorkDirAnalyzer) Init(az ...Analyzer) {
@@ -67,14 +68,28 @@ func (w *WorkDirAnalyzer) Analyze(graph types.CFGraph) (ResultReader, error) {
 	var cmdList []string
 
 	for _, node := range cdNodes {
-		if len(node.Args()) > 0 {
-			target := node.Args()[0]
-			w.cwd = resolvePath(w.cwd, target)
-			cmd := fmt.Sprintf("cd %s", w.cwd)
-			cmdList = append(cmdList, cmd)
+		if len(node.Args()) == 0 {
+			continue
 		}
-	}
+		target := node.Args()[0]
+		switch target {
+		case "-":
+			if w.prevCwd == "" {
+				continue
+			}
+			w.cwd, w.prevCwd = w.prevCwd, w.cwd
 
+		case "~":
+			//TODO
+
+		default:
+			newCwd := resolvePath(w.cwd, target)
+			w.prevCwd = w.cwd
+			w.cwd = newCwd
+		}
+		cmd := fmt.Sprintf("cd %s", w.cwd)
+		cmdList = append(cmdList, cmd)
+	}
 	results := lo.Map(cmdList, func(cmd string, _ int) *command.Result {
 		return &command.Result{
 			Cmd: cmd,
