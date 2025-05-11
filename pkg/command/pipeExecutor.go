@@ -4,87 +4,19 @@ import (
 	"bytes"
 	"dockgen/pkg/builtin"
 	"dockgen/pkg/rule"
+	"dockgen/pkg/util"
 	"fmt"
-	"github.com/shirou/gopsutil/process"
 	"io"
 	"log"
 	"os/exec"
 	"strings"
-	"syscall"
 )
-
-type DelimitedReader struct {
-	r      io.Reader
-	delim  []byte
-	buffer []byte
-	eofHit bool
-}
-
-func NewDelimitedReader(r io.Reader, delim string) *DelimitedReader {
-	return &DelimitedReader{
-		r:     r,
-		delim: []byte(delim),
-	}
-}
-
-func (dr *DelimitedReader) Read(p []byte) (int, error) {
-	if dr.eofHit {
-		dr.eofHit = false
-	}
-	for {
-		if idx := bytes.Index(dr.buffer, dr.delim); idx != -1 {
-			n := copy(p, dr.buffer[:idx])
-			dr.buffer = dr.buffer[idx+len(dr.delim):]
-			dr.eofHit = true
-			return n, io.EOF
-		}
-
-		tmp := make([]byte, 1024)
-		n, err := dr.r.Read(tmp)
-		if n > 0 {
-			dr.buffer = append(dr.buffer, tmp[:n]...)
-		}
-
-		if err != nil {
-			if len(dr.buffer) > 0 {
-				n := copy(p, dr.buffer)
-				dr.buffer = nil
-				return n, io.EOF
-			}
-			return 0, err
-		}
-	}
-}
-
-func getChildrenPid(pid int) ([]int, error) {
-	p, err := process.NewProcess(int32(pid))
-	if err != nil {
-		return nil, err
-	}
-
-	children, err := p.Children()
-	if err != nil {
-		return nil, err
-	}
-
-	var childrenPid []int
-	for _, child := range children {
-		childrenPid = append(childrenPid, int(child.Pid))
-	}
-	return childrenPid, nil
-}
-
-func destroyChildrenProcess(childrenPid []int) {
-	for _, pid := range childrenPid {
-		_ = syscall.Kill(pid, syscall.SIGKILL)
-	}
-}
 
 type PipeCommandExecutor struct {
 	delim        string
 	stdin        io.WriteCloser
-	stdout       io.Reader
-	stderr       io.Reader
+	stdout       *util.DelimitedReader
+	stderr       *util.DelimitedReader
 	cmd          *exec.Cmd
 	builtinRules map[string]builtin.Rule
 }
@@ -125,8 +57,8 @@ func NewPipeCommandExecutor(CMD string, opts ...PipeExecutorOptions) (*PipeComma
 		return nil, err
 	}
 	delim := "__CMD_DONE__"
-	stdoutReader := NewDelimitedReader(stdout, delim)
-	stderrReader := NewDelimitedReader(stderr, delim)
+	stdoutReader := util.NewDelimitedReader(stdout)
+	stderrReader := util.NewDelimitedReader(stderr)
 
 	p := &PipeCommandExecutor{
 		stdin:        stdin,
