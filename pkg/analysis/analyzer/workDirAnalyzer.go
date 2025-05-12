@@ -72,22 +72,29 @@ func (w *WorkDirAnalyzer) Analyze(graph types.CFGraph) (ResultReader, error) {
 			continue
 		}
 		target := node.Args()[0]
-		switch target {
-		case "-":
+		switch target[0] {
+		case '-':
 			if w.prevCwd == "" {
 				continue
 			}
 			w.cwd, w.prevCwd = w.prevCwd, w.cwd
 
-		case "~":
+		case '~', '$':
 			envNodes := f.GetFamilyCmd("env")
 			envNode, ok := lo.Last(envNodes)
 			if !ok {
 				return nil, nil
 			}
 			envNodes = ParseEnvCmdIR(envNode)
+			var EnvVariable string
+			switch target[0] {
+			case '~':
+				EnvVariable = "HOME"
+			case '$':
+				EnvVariable = target[1:]
+			}
 			homeNode, ok := lo.Find(envNodes, func(ir types.IR) bool {
-				return ir.Env().EnvVariable == "HOME"
+				return ir.Env().EnvVariable == EnvVariable
 			})
 			if !ok {
 				return nil, fmt.Errorf("the environment variable HOME was not found")
