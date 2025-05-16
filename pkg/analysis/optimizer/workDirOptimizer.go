@@ -28,21 +28,21 @@ func (w *WorkDirOptimizer) Optimize() (Result, error) {
 	path := mergeAdjacentPath(res)
 
 	for _, p := range path {
-		fmt.Println(p.Cmd())
+		fmt.Println(p.OldIR.Cmd())
 	}
 
 	return nil, nil
 }
 
 // adjacent path
-func mergeAdjacentPath(result analyzer.ResultReader) []types.IR {
+func mergeAdjacentPath(result analyzer.ResultReader) []analyzer.Item {
 	var stack []analyzer.Item
-	var path []types.IR
+	var path []analyzer.Item
 	for _, res := range result.Items() {
 		if len(stack) != 0 {
 			top := stack[len(stack)-1]
 			if top.OldIR.ID()+1 != res.OldIR.ID() {
-				path = append(path, top.NewIR)
+				path = append(path, top)
 				stack = nil
 			}
 		}
@@ -51,7 +51,7 @@ func mergeAdjacentPath(result analyzer.ResultReader) []types.IR {
 
 	if len(stack) != 0 {
 		top := stack[len(stack)-1]
-		path = append(path, top.NewIR)
+		path = append(path, top)
 	}
 
 	return path
