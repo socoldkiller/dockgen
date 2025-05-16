@@ -3,8 +3,13 @@ package optimizer
 import (
 	"dockgen/pkg/analysis/analyzer"
 	"dockgen/pkg/analysis/types"
-	"fmt"
+	"github.com/samber/lo"
 )
+
+type OptimizeIR struct {
+	line int
+	ir   types.IR
+}
 
 type WorkDirOptimizer struct {
 	az *analyzer.WorkDirAnalyzer
@@ -15,7 +20,7 @@ func NewWorkDirOptimizer(az *analyzer.WorkDirAnalyzer, g types.CFGraph) *WorkDir
 	return &WorkDirOptimizer{az: az, g: g}
 }
 
-func (w *WorkDirOptimizer) Optimize() (Result, error) {
+func (w *WorkDirOptimizer) Optimize() ([]*OptimizeIR, error) {
 	f := &analyzer.FamilyAnalyzer{}
 	w.az.Init(f)
 
@@ -26,12 +31,12 @@ func (w *WorkDirOptimizer) Optimize() (Result, error) {
 	}
 
 	path := mergeAdjacentPath(res)
-
-	for _, p := range path {
-		fmt.Println(p.OldIR.Cmd())
-	}
-
-	return nil, nil
+	return lo.Map(path, func(item analyzer.Item, index int) *OptimizeIR {
+		return &OptimizeIR{
+			line: item.OldIR.ID(),
+			ir:   item.NewIR,
+		}
+	}), nil
 }
 
 // adjacent path
